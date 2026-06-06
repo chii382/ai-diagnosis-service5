@@ -1,0 +1,111 @@
+:root {
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-snap-type: y proximity;
+}
+
+body {
+  margin: 0;
+  background: #000000;
+  color: #ffffff;
+  overflow-x: hidden;
+}
+
+/* 全画面パネルのスクロールスナップ */
+.snap {
+  scroll-snap-align: start;
+}
+
+/* 星空（複数のradial-gradientを重ねたstarfield） */
+.stars {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    radial-gradient(1.6px 1.6px at 25% 15%, rgba(255, 255, 255, 0.9), transparent),
+    radial-gradient(1.6px 1.6px at 75% 25%, rgba(255, 255, 255, 0.85), transparent),
+    radial-gradient(1px 1px at 50% 60%, rgba(255, 255, 255, 0.7), transparent),
+    radial-gradient(1px 1px at 15% 75%, rgba(255, 255, 255, 0.6), transparent),
+    radial-gradient(1px 1px at 85% 80%, rgba(255, 255, 255, 0.7), transparent),
+    radial-gradient(1.4px 1.4px at 35% 45%, rgba(255, 255, 255, 0.8), transparent),
+    radial-gradient(1px 1px at 65% 50%, rgba(255, 255, 255, 0.5), transparent),
+    radial-gradient(1.2px 1.2px at 90% 40%, rgba(255, 255, 255, 0.6), transparent),
+    radial-gradient(1px 1px at 10% 35%, rgba(255, 255, 255, 0.5), transparent),
+    radial-gradient(1px 1px at 55% 18%, rgba(255, 255, 255, 0.55), transparent),
+    radial-gradient(1px 1px at 42% 88%, rgba(255, 255, 255, 0.5), transparent);
+  background-repeat: repeat;
+  background-size: 620px 620px;
+  animation: twinkle 7s ease-in-out infinite;
+}
+
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* 背景画像のゆっくりしたズーム（動画的な演出） */
+.bg-zoom {
+  animation: kenburns 26s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+@keyframes kenburns {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.1);
+  }
+}
+
+/* ゆっくり上昇していくパン（打ち上げの上昇感） */
+.bg-rise {
+  animation: kenburns-rise 32s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+@keyframes kenburns-rise {
+  from {
+    transform: scale(1.16) translateY(3.5%);
+  }
+  to {
+    transform: scale(1.16) translateY(-3.5%);
+  }
+}
+
+@keyframes bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translateY(8px);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .stars {
+    animation: none;
+  }
+  .bg-zoom,
+  .bg-rise {
+    animation: none;
+  }
+}
