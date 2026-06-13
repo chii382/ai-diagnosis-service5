@@ -1,4 +1,3 @@
-import { Suspense } from "react";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import { isAuthConfigured } from "@/auth.config";
@@ -8,11 +7,22 @@ export const metadata = {
   title: "ログイン | AIキャリア診断",
 };
 
-export default function SignInPage() {
+export const dynamic = "force-dynamic";
+
+type SignInPageProps = {
+  searchParams: Promise<{ callbackUrl?: string }>;
+};
+
+export default async function SignInPage({ searchParams }: SignInPageProps) {
   const configured = isAuthConfigured();
+  const params = await searchParams;
+  const callbackUrl =
+    typeof params.callbackUrl === "string" && params.callbackUrl.startsWith("/")
+      ? params.callbackUrl
+      : "/dashboard";
 
   return (
-    <Suspense>
+    <>
       {!configured && (
         <Box sx={{ position: "fixed", top: 16, left: 16, right: 16, zIndex: 10 }}>
           <Alert severity="warning">
@@ -21,7 +31,7 @@ export default function SignInPage() {
           </Alert>
         </Box>
       )}
-      <SignInForm authConfigured={configured} />
-    </Suspense>
+      <SignInForm authConfigured={configured} callbackUrl={callbackUrl} />
+    </>
   );
 }

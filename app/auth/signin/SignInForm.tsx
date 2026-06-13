@@ -1,7 +1,6 @@
 "use client";
 
 import { signIn } from "next-auth/react";
-import { useSearchParams } from "next/navigation";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
@@ -14,11 +13,13 @@ import ExploreIcon from "@mui/icons-material/Explore";
 
 interface SignInFormProps {
   authConfigured?: boolean;
+  callbackUrl?: string;
 }
 
-export default function SignInForm({ authConfigured = false }: SignInFormProps) {
-  const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") ?? "/dashboard";
+export default function SignInForm({
+  authConfigured = false,
+  callbackUrl = "/dashboard",
+}: SignInFormProps) {
 
   return (
     <Box
