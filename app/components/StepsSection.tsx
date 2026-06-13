@@ -23,16 +23,17 @@ interface Step {
 const steps: Step[] = [
   {
     no: "01",
-    title: "質問に回答",
-    description: "5つの質問に直感で回答します。所要時間は約3分です。",
+    title: "質問に答える",
+    description: "5つの質問に、直感で答えるだけ。\n所要時間は約3分です。",
     icon: EditNoteIcon,
     accent: "#22d3ee",
     glow: "rgba(34,211,238,0.25)",
   },
   {
     no: "02",
-    title: "AI分析",
-    description: "AIがあなたの回答を分析し、強みと適性を導き出します。",
+    title: "AIが分析する",
+    description:
+      "強み・適性・見逃されがちな可能性を、\n回答から見つけ出します。",
     icon: AutoAwesomeIcon,
     accent: "#ff3d81",
     glow: "rgba(255,61,129,0.32)",
@@ -40,8 +41,8 @@ const steps: Step[] = [
   },
   {
     no: "03",
-    title: "結果表示",
-    description: "あなた専用のキャリアロードマップが表示されます。",
+    title: "結果を受け取る",
+    description: "あなたに合ったアドバイスと、\n次の一歩をわかりやすくお届けします。",
     icon: InsightsIcon,
     accent: "#a855f7",
     glow: "rgba(168,85,247,0.25)",
@@ -84,9 +85,14 @@ export default function StepsSection() {
           </Typography>
           <Typography
             variant="h2"
-            sx={{ color: "#fff", fontSize: { xs: "2rem", md: "3rem" } }}
+            sx={{ color: "#fff", fontSize: { xs: "2rem", md: "3rem" }, lineHeight: 1.25 }}
           >
-            診断はかんたん3ステップ
+            <Box component="span" sx={{ display: { xs: "block", sm: "inline" } }}>
+              3ステップで、
+            </Box>
+            <Box component="span" sx={{ display: { xs: "block", sm: "inline" } }}>
+              診断完了
+            </Box>
           </Typography>
         </Stack>
 
@@ -139,7 +145,7 @@ export default function StepsSection() {
                       }}
                     >
                       <StarIcon sx={{ fontSize: 14 }} />
-                      ココが核心
+                      ポイント
                     </Box>
                   )}
 
@@ -184,6 +190,7 @@ export default function StepsSection() {
                       color: "rgba(255,255,255,0.72)",
                       fontSize: "0.95rem",
                       lineHeight: 1.8,
+                      whiteSpace: "pre-line",
                     }}
                   >
                     {s.description}

@@ -1,5 +1,7 @@
 :root {
   color-scheme: dark;
+  --font-jp-mincho: "Hiragino Mincho ProN", "Hiragino Mincho Pro", "Yu Mincho",
+    "YuMincho", "HGMinchoE", "MS PMincho", serif;
 }
 
 * {
@@ -16,9 +18,32 @@ body {
   background: #000000;
   color: #ffffff;
   overflow-x: hidden;
+  font-family: var(--font-jp-mincho);
+  font-weight: 600;
+  line-break: strict;
+  word-break: keep-all;
+  overflow-wrap: break-word;
 }
 
-/* 全画面パネルのスクロールスナップ */
+/* 固定ヘッダー分のオフセット（アンカージャンプ用） */
+#top,
+#pain,
+#features,
+#steps,
+#start {
+  scroll-margin-top: 72px;
+}
+
+@media (max-width: 899.95px) {
+  #top,
+  #pain,
+  #features,
+  #steps,
+  #start {
+    scroll-margin-top: 56px;
+  }
+}
+
 .snap {
   scroll-snap-align: start;
 }
@@ -85,6 +110,171 @@ body {
   }
 }
 
+/* 会員ダッシュボード等：ロケットを大きく見せる */
+.bg-rise-hero {
+  animation: kenburns-rise-hero 42s ease-in-out infinite alternate;
+  will-change: transform;
+  transform-origin: center bottom;
+}
+
+@keyframes kenburns-rise-hero {
+  from {
+    transform: scale(1.08) translateY(1.5%);
+  }
+  to {
+    transform: scale(1.08) translateY(-1.5%);
+  }
+}
+
+/* SpaceX Starship ページ風：ロケット全体（先端〜基部）を中央に */
+.bg-rise-starship {
+  animation: kenburns-rise-starship 48s ease-in-out infinite alternate;
+  will-change: transform;
+  transform-origin: center center;
+}
+
+@keyframes kenburns-rise-starship {
+  from {
+    transform: scale(1.02) translateY(0.5%);
+  }
+  to {
+    transform: scale(1.06) translateY(-0.5%);
+  }
+}
+
+/* ダッシュボード：シネマティックなゆっくりズーム＋微パン */
+.bg-dashboard-cinematic {
+  animation: dashboard-kenburns 54s ease-in-out infinite alternate;
+  will-change: transform;
+  transform-origin: center center;
+}
+
+@keyframes dashboard-kenburns {
+  from {
+    transform: scale(1.05) translate3d(-0.3%, 0.5%, 0);
+  }
+  to {
+    transform: scale(1.1) translate3d(0.3%, -0.7%, 0);
+  }
+}
+
+.dashboard-steam-glow {
+  animation: dashboard-steam-glow 9s ease-in-out infinite alternate;
+}
+
+@keyframes dashboard-steam-glow {
+  from {
+    opacity: 0.48;
+  }
+  to {
+    opacity: 0.78;
+  }
+}
+
+/* ダッシュボード：背景・星・コンテンツの浮遊感 */
+.dashboard-bg-float {
+  position: absolute;
+  inset: -4%;
+  animation: dashboard-bg-drift 18s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+@keyframes dashboard-bg-drift {
+  from {
+    transform: translate3d(-0.2%, 0.6%, 0);
+  }
+  to {
+    transform: translate3d(0.5%, -1.1%, 0);
+  }
+}
+
+.dashboard-stars-drift {
+  position: absolute;
+  inset: -3%;
+  animation: dashboard-stars-drift 24s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+@keyframes dashboard-stars-drift {
+  from {
+    transform: translate3d(-0.35%, 0.5%, 0);
+  }
+  to {
+    transform: translate3d(0.45%, -0.85%, 0);
+  }
+}
+
+.dashboard-glow-float {
+  animation:
+    dashboard-steam-glow 9s ease-in-out infinite alternate,
+    dashboard-glow-drift 20s ease-in-out infinite alternate;
+}
+
+@keyframes dashboard-glow-drift {
+  from {
+    transform: translate3d(0, 0.3%, 0);
+  }
+  to {
+    transform: translate3d(0, -0.6%, 0);
+  }
+}
+
+.stars-dashboard {
+  background-image:
+    radial-gradient(1.6px 1.6px at 25% 15%, rgba(255, 255, 255, 0.95), transparent),
+    radial-gradient(1.6px 1.6px at 75% 25%, rgba(255, 255, 255, 0.9), transparent),
+    radial-gradient(1px 1px at 50% 60%, rgba(255, 255, 255, 0.75), transparent),
+    radial-gradient(1px 1px at 15% 75%, rgba(255, 255, 255, 0.65), transparent),
+    radial-gradient(1px 1px at 85% 80%, rgba(255, 255, 255, 0.75), transparent),
+    radial-gradient(1.4px 1.4px at 35% 45%, rgba(255, 255, 255, 0.85), transparent),
+    radial-gradient(1px 1px at 65% 50%, rgba(255, 255, 255, 0.6), transparent),
+    radial-gradient(1.2px 1.2px at 90% 40%, rgba(255, 255, 255, 0.7), transparent),
+    radial-gradient(1px 1px at 10% 35%, rgba(255, 255, 255, 0.6), transparent),
+    radial-gradient(1px 1px at 55% 18%, rgba(255, 255, 255, 0.65), transparent),
+    radial-gradient(1px 1px at 42% 88%, rgba(255, 255, 255, 0.6), transparent),
+    radial-gradient(1.2px 1.2px at 18% 52%, rgba(255, 255, 255, 0.7), transparent),
+    radial-gradient(1px 1px at 72% 68%, rgba(255, 255, 255, 0.55), transparent),
+    radial-gradient(1.4px 1.4px at 48% 28%, rgba(255, 255, 255, 0.8), transparent),
+    radial-gradient(1px 1px at 92% 12%, rgba(255, 255, 255, 0.65), transparent),
+    radial-gradient(1px 1px at 6% 92%, rgba(255, 255, 255, 0.5), transparent);
+  background-size: 460px 460px;
+  animation: twinkle-dashboard 4.2s ease-in-out infinite;
+}
+
+.stars-dashboard-layer-2 {
+  background-size: 520px 520px;
+  background-position: 120px 80px;
+  opacity: 0.72;
+  animation: twinkle-dashboard 6.5s ease-in-out infinite reverse;
+}
+
+@keyframes twinkle-dashboard {
+  0%,
+  100% {
+    opacity: 0.42;
+  }
+  40% {
+    opacity: 1;
+  }
+  70% {
+    opacity: 0.58;
+  }
+}
+
+.dashboard-content-float {
+  animation: dashboard-content-float 10s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+@keyframes dashboard-content-float {
+  from {
+    transform: translate3d(0, 6px, 0);
+  }
+  to {
+    transform: translate3d(0, -8px, 0);
+  }
+}
+
 @keyframes bounce {
   0%,
   100% {
@@ -97,6 +287,76 @@ body {
   }
 }
 
+/* ヒーロー見出し：浮きだしてくる */
+.hero-headline-line {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(52px) scale(0.9);
+  filter: blur(10px);
+  animation: hero-emerge 1.45s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.hero-headline-line-1 {
+  display: block;
+}
+
+.hero-headline-line-2 {
+  display: block;
+  animation-delay: 0.52s;
+}
+
+.hero-headline-phrase {
+  display: inline;
+}
+
+@media (max-width: 599.95px) {
+  .hero-headline-phrase {
+    display: block;
+  }
+}
+
+@media (min-width: 600px) {
+  .hero-headline-line-2 {
+    white-space: nowrap;
+  }
+}
+
+@keyframes hero-emerge {
+  0% {
+    opacity: 0;
+    transform: translateY(52px) scale(0.9);
+    filter: blur(10px);
+    text-shadow: 0 0 0 rgba(56, 123, 255, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+    text-shadow: 0 0 40px rgba(56, 123, 255, 0.35);
+  }
+}
+
+/* ヒーローサブコピー：タイプライター */
+.hero-typewriter-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  background-color: rgba(255, 255, 255, 0.85);
+  animation: hero-cursor-blink 0.9s step-end infinite;
+}
+
+@keyframes hero-cursor-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -105,7 +365,26 @@ body {
     animation: none;
   }
   .bg-zoom,
-  .bg-rise {
+  .bg-rise,
+  .bg-rise-hero,
+  .bg-rise-starship,
+  .bg-dashboard-cinematic,
+  .dashboard-steam-glow,
+  .dashboard-bg-float,
+  .dashboard-stars-drift,
+  .dashboard-glow-float,
+  .stars-dashboard,
+  .dashboard-content-float {
     animation: none;
+  }
+  .hero-headline-line {
+    animation: none;
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+  .hero-typewriter-cursor {
+    animation: none;
+    display: none;
   }
 }

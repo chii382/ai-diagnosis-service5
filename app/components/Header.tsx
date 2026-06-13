@@ -6,11 +6,29 @@ import Typography from "@mui/material/Typography";
 import Link from "@mui/material/Link";
 import Stack from "@mui/material/Stack";
 import ExploreIcon from "@mui/icons-material/Explore";
+import HeaderAuthActions from "@/app/components/HeaderAuthActions";
 
 const navItems = [
-  { label: "FEATURES", href: "#features" },
+  { label: "WHY CHOOSE US", href: "#features" },
   { label: "HOW IT WORKS", href: "#steps" },
+  { label: "START NOW", href: "#start" },
 ];
+
+const concernsNav = { label: "YOUR CONCERNS", href: "#pain" };
+
+const navLinkSx = {
+  color: "rgba(255,255,255,0.8)",
+  fontSize: { md: "0.64rem", lg: "0.7rem" },
+  fontWeight: 600,
+  letterSpacing: "0.12em",
+  whiteSpace: "nowrap",
+  flexShrink: 0,
+  wordBreak: "normal",
+  lineBreak: "auto",
+  transition: "color 0.2s ease",
+  cursor: "pointer",
+  "&:hover": { color: "#fff" },
+} as const;
 
 export default function Header() {
   return (
@@ -25,8 +43,20 @@ export default function Header() {
       }}
     >
       <Container maxWidth="lg">
-        <Toolbar disableGutters sx={{ minHeight: { xs: 56, md: 72 } }}>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+        <Toolbar disableGutters sx={{ minHeight: { xs: 56, md: 72 }, gap: 1 }}>
+          <Link
+            href="#top"
+            underline="none"
+            aria-label="ページ先頭へ戻る"
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+              color: "inherit",
+              transition: "opacity 0.2s ease",
+              "&:hover": { opacity: 0.85 },
+            }}
+          >
             <ExploreIcon sx={{ color: "#fff", fontSize: 24 }} />
             <Typography
               component="span"
@@ -39,34 +69,36 @@ export default function Header() {
             >
               AIキャリア診断
             </Typography>
-          </Box>
+          </Link>
 
           <Box sx={{ flexGrow: 1 }} />
 
           <Stack
             direction="row"
-            spacing={4}
+            spacing={{ md: 1.75, lg: 2.75 }}
             alignItems="center"
-            sx={{ display: { xs: "none", md: "flex" } }}
+            sx={{
+              mr: { xs: 0.5, md: 0.5 },
+              flexShrink: 0,
+              display: { xs: "none", md: "flex" },
+            }}
           >
+            <Link
+              href={concernsNav.href}
+              underline="none"
+              sx={navLinkSx}
+            >
+              {concernsNav.label}
+            </Link>
+
             {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                underline="none"
-                sx={{
-                  color: "rgba(255,255,255,0.8)",
-                  fontSize: "0.75rem",
-                  fontWeight: 600,
-                  letterSpacing: "0.18em",
-                  transition: "color 0.2s ease",
-                  "&:hover": { color: "#fff" },
-                }}
-              >
+              <Link key={item.href} href={item.href} underline="none" sx={navLinkSx}>
                 {item.label}
               </Link>
             ))}
           </Stack>
+
+          <HeaderAuthActions />
         </Toolbar>
       </Container>
     </AppBar>

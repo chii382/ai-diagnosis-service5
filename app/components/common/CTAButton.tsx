@@ -13,7 +13,7 @@ interface CTAButtonProps extends Omit<ButtonProps, "variant"> {
 }
 
 export default function CTAButton({
-  label = "無料で診断を始める",
+  label = "無料で診断する",
   appearance = "solid",
   sx,
   ...rest

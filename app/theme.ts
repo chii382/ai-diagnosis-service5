@@ -1,6 +1,8 @@
 "use client";
 
 import { createTheme } from "@mui/material/styles";
+import { JP_MINCHO_FONT_FAMILY, JP_MINCHO_FONT_WEIGHT } from "@/lib/fonts";
+import { jpTextSx } from "@/lib/typography";
 
 export const ACCENT = "#387bff";
 
@@ -32,17 +34,33 @@ const theme = createTheme({
     divider: "rgba(255,255,255,0.14)",
   },
   typography: {
-    fontFamily:
-      'var(--font-geist-sans), system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
-    h1: { fontWeight: 700, lineHeight: 1.08, letterSpacing: "-0.01em" },
-    h2: { fontWeight: 700, lineHeight: 1.12, letterSpacing: "-0.01em" },
-    h3: { fontWeight: 600, lineHeight: 1.2 },
-    button: { fontWeight: 600, textTransform: "none" },
+    fontFamily: JP_MINCHO_FONT_FAMILY,
+    fontWeightRegular: JP_MINCHO_FONT_WEIGHT,
+    fontWeightMedium: JP_MINCHO_FONT_WEIGHT,
+    fontWeightBold: 700,
+    h1: { fontWeight: 700, lineHeight: 1.08, letterSpacing: "0.02em" },
+    h2: { fontWeight: 700, lineHeight: 1.12, letterSpacing: "0.02em" },
+    h3: { fontWeight: JP_MINCHO_FONT_WEIGHT, lineHeight: 1.2 },
+    button: { fontWeight: JP_MINCHO_FONT_WEIGHT, textTransform: "none" },
   },
   shape: {
     borderRadius: 4,
   },
   components: {
+    MuiCssBaseline: {
+      styleOverrides: {
+        body: {
+          fontFamily: JP_MINCHO_FONT_FAMILY,
+          fontWeight: JP_MINCHO_FONT_WEIGHT,
+          ...jpTextSx,
+        },
+      },
+    },
+    MuiTypography: {
+      styleOverrides: {
+        root: jpTextSx,
+      },
+    },
     MuiButton: {
       styleOverrides: {
         root: {

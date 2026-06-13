@@ -2,12 +2,13 @@ import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
-import CTAButton from "@/app/components/common/CTAButton";
+import LoggedOutCTA from "@/app/components/common/LoggedOutCTA";
 import CosmicVideoBackground from "@/app/components/common/CosmicVideoBackground";
 
 export default function CTASection() {
   return (
     <Box
+      id="start"
       component="section"
       className="snap"
       sx={{
@@ -45,12 +46,16 @@ export default function CTASection() {
             sx={{
               color: "#fff",
               fontSize: { xs: "2.1rem", sm: "3rem", md: "3.75rem" },
+              lineHeight: 1.25,
               textShadow: "0 0 40px rgba(56,123,255,0.4)",
             }}
           >
-            さあ、あなたの
-            <br />
-            キャリアを見つけよう
+            <Box component="span" sx={{ display: "block" }}>
+              まずは5問、
+            </Box>
+            <Box component="span" sx={{ display: "block" }}>
+              確かめてみませんか。
+            </Box>
           </Typography>
           <Typography
             sx={{
@@ -60,11 +65,14 @@ export default function CTASection() {
               lineHeight: 1.9,
             }}
           >
-            5問に答えるだけ。今すぐ無料で、あなただけのキャリアロードマップを手に入れましょう。
+            <Box component="span" sx={{ display: "block" }}>
+              あなたの強みは、思っているより近くにあります。
+            </Box>
+            <Box component="span" sx={{ display: "block" }}>
+              無料プランから、気軽にお試しください。
+            </Box>
           </Typography>
-          <Box sx={{ pt: 1 }}>
-            <CTAButton appearance="solid" />
-          </Box>
+          <LoggedOutCTA appearance="solid" />
         </Stack>
       </Container>
     </Box>

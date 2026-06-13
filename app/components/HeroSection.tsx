@@ -2,12 +2,14 @@ import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
-import CTAButton from "@/app/components/common/CTAButton";
+import LoggedOutCTA from "@/app/components/common/LoggedOutCTA";
 import CosmicVideoBackground from "@/app/components/common/CosmicVideoBackground";
+import HeroTypewriterText from "@/app/components/hero/HeroTypewriterText";
 
 export default function HeroSection() {
   return (
     <Box
+      id="top"
       component="section"
       className="snap"
       sx={{
@@ -28,44 +30,73 @@ export default function HeroSection() {
 
       <Container maxWidth="md" sx={{ position: "relative", zIndex: 1 }}>
         <Stack spacing={{ xs: 3, md: 4 }} alignItems="center" textAlign="center">
-          <Typography
+          <Box
             sx={{
-              color: "rgba(255,255,255,0.6)",
-              fontSize: { xs: "0.7rem", md: "0.8rem" },
-              fontWeight: 600,
-              letterSpacing: "0.35em",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: { xs: 1.25, sm: 2, md: 2.5 },
+              width: "100%",
+              maxWidth: 560,
+              justifyContent: "center",
+              px: { xs: 1, sm: 0 },
             }}
           >
-            AI CAREER DIAGNOSIS
-          </Typography>
+            <Box
+              aria-hidden
+              sx={{
+                flex: 1,
+                height: "1px",
+                maxWidth: { xs: 56, sm: 80, md: 96 },
+                background:
+                  "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.15) 35%, rgba(96,165,250,0.55) 100%)",
+              }}
+            />
+            <Typography
+              component="p"
+              sx={{
+                color: "rgba(255,255,255,0.78)",
+                fontSize: { xs: "0.82rem", sm: "0.95rem", md: "1.08rem" },
+                fontWeight: 600,
+                letterSpacing: { xs: "0.26em", sm: "0.32em", md: "0.38em" },
+                lineHeight: 1.2,
+                whiteSpace: "nowrap",
+                textShadow: "0 0 28px rgba(56,123,255,0.25)",
+              }}
+            >
+              AI CAREER DIAGNOSIS
+            </Typography>
+            <Box
+              aria-hidden
+              sx={{
+                flex: 1,
+                height: "1px",
+                maxWidth: { xs: 56, sm: 80, md: 96 },
+                background:
+                  "linear-gradient(270deg, transparent 0%, rgba(255,255,255,0.15) 35%, rgba(96,165,250,0.55) 100%)",
+              }}
+            />
+          </Box>
 
           <Typography
             variant="h1"
+            className="hero-headline"
             sx={{
               color: "#fff",
-              fontSize: { xs: "2.4rem", sm: "3.4rem", md: "4.75rem" },
+              fontSize: { xs: "2.35rem", sm: "3.4rem", md: "4.75rem" },
+              lineHeight: 1.22,
               textShadow: "0 0 40px rgba(56,123,255,0.35)",
             }}
           >
-            5問でわかる、
-            <br />
-            あなたのキャリア
+            <span className="hero-headline-line hero-headline-line-1">5問、3分で、</span>
+            <span className="hero-headline-line hero-headline-line-2">
+              <span className="hero-headline-phrase">あなたの人生は</span>
+              <span className="hero-headline-phrase hero-headline-phrase-accent">変わる。</span>
+            </span>
           </Typography>
 
-          <Typography
-            sx={{
-              color: "rgba(255,255,255,0.75)",
-              fontSize: { xs: "1rem", md: "1.2rem" },
-              maxWidth: 640,
-              lineHeight: 1.8,
-            }}
-          >
-            AIがあなたに最適なキャリアロードマップを提案します
-          </Typography>
+          <HeroTypewriterText />
 
-          <Box sx={{ pt: 1 }}>
-            <CTAButton appearance="solid" />
-          </Box>
+          <LoggedOutCTA appearance="solid" />
         </Stack>
       </Container>
     </Box>

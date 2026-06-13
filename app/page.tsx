@@ -1,6 +1,7 @@
 import Box from "@mui/material/Box";
 import Header from "@/app/components/Header";
 import HeroSection from "@/app/components/HeroSection";
+import PainSection from "@/app/components/PainSection";
 import FeaturesSection from "@/app/components/FeaturesSection";
 import StepsSection from "@/app/components/StepsSection";
 import CTASection from "@/app/components/CTASection";
@@ -12,6 +13,7 @@ export default function Home() {
       <Header />
       <Box component="main" sx={{ flex: 1 }}>
         <HeroSection />
+        <PainSection />
         <FeaturesSection />
         <StepsSection />
         <CTASection />
