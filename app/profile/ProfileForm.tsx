@@ -163,13 +163,25 @@ export default function ProfileForm({ initialProfile }: ProfileFormProps) {
         method: "POST",
         body: formData,
       });
-      const data = await response.json();
+      const raw = await response.text();
+      let data: { error?: string; image?: string } = {};
+      if (raw) {
+        try {
+          data = JSON.parse(raw) as { error?: string; image?: string };
+        } catch {
+          throw new Error("サーバーからの応答を読み取れませんでした");
+        }
+      }
 
       if (!response.ok) {
         throw new Error(data.error ?? "アイコンの更新に失敗しました");
       }
 
-      setProfile((current) => ({ ...current, image: data.image }));
+      if (!data.image) {
+        throw new Error("アイコンの更新に失敗しました");
+      }
+
+      setProfile((current) => ({ ...current, image: data.image! }));
       await updateSession({ image: data.image });
       router.refresh();
       setMessage({ type: "success", text: "アイコンを更新しました。" });
