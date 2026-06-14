@@ -13,11 +13,14 @@ function buildProviders() {
     Google({
       clientId,
       clientSecret,
+      // clientSecret ありのサーバー OAuth では state のみで十分（PKCE Cookie 問題を回避）
+      checks: ["state"],
     }),
   ];
 }
 
 export const authConfig = {
+  secret: process.env.AUTH_SECRET,
   providers: buildProviders(),
   session: {
     strategy: "jwt",

@@ -1,6 +1,9 @@
-import { MongoClient } from "mongodb";
+import { MongoClient, type MongoClientOptions } from "mongodb";
 
-const options = {};
+const options: MongoClientOptions = {
+  serverSelectionTimeoutMS: 10000,
+  maxPoolSize: 10,
+};
 
 declare global {
   // eslint-disable-next-line no-var
@@ -12,7 +15,7 @@ export function isMongoConfigured(): boolean {
 }
 
 export function getMongoUri(): string {
-  const uri = process.env.MONGODB_URI;
+  const uri = process.env.MONGODB_URI?.trim();
   if (!uri) {
     throw new Error(
       '環境変数 "MONGODB_URI" が未設定です。.env.local を .env.example を参考に作成してください。',
@@ -22,18 +25,11 @@ export function getMongoUri(): string {
 }
 
 export function getMongoClientPromise(): Promise<MongoClient> {
-  const uri = getMongoUri();
-
-  if (process.env.NODE_ENV === "development") {
-    if (!global._mongoClientPromise) {
-      const client = new MongoClient(uri, options);
-      global._mongoClientPromise = client.connect();
-    }
-    return global._mongoClientPromise;
+  if (!global._mongoClientPromise) {
+    const client = new MongoClient(getMongoUri(), options);
+    global._mongoClientPromise = client.connect();
   }
-
-  const client = new MongoClient(uri, options);
-  return client.connect();
+  return global._mongoClientPromise;
 }
 
 export async function getUsersCollection() {
