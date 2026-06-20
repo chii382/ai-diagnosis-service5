@@ -25,6 +25,8 @@ export default function HeroSection() {
       <CosmicVideoBackground
         image="/images/hero-cosmos.png"
         position="center 30%"
+        mobilePosition="center 38%"
+        mobileBackgroundSize="auto 105%"
         overlay="linear-gradient(180deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.2) 45%, rgba(0,0,0,0.55) 100%)"
       />
 

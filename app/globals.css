@@ -21,8 +21,9 @@ body {
   font-family: var(--font-jp-mincho);
   font-weight: 600;
   line-break: strict;
-  word-break: keep-all;
+  word-break: normal;
   overflow-wrap: break-word;
+  text-wrap: pretty;
 }
 
 /* 固定ヘッダー分のオフセット（アンカージャンプ用） */
@@ -144,6 +145,7 @@ body {
 
 /* ダッシュボード：シネマティックなゆっくりズーム＋微パン */
 .bg-dashboard-cinematic {
+  pointer-events: none;
   animation: dashboard-kenburns 54s ease-in-out infinite alternate;
   will-change: transform;
   transform-origin: center center;
@@ -159,6 +161,7 @@ body {
 }
 
 .dashboard-steam-glow {
+  pointer-events: none;
   animation: dashboard-steam-glow 9s ease-in-out infinite alternate;
 }
 
@@ -175,6 +178,7 @@ body {
 .dashboard-bg-float {
   position: absolute;
   inset: -4%;
+  pointer-events: none;
   animation: dashboard-bg-drift 18s ease-in-out infinite alternate;
   will-change: transform;
 }
@@ -191,6 +195,7 @@ body {
 .dashboard-stars-drift {
   position: absolute;
   inset: -3%;
+  pointer-events: none;
   animation: dashboard-stars-drift 24s ease-in-out infinite alternate;
   will-change: transform;
 }
@@ -205,6 +210,7 @@ body {
 }
 
 .dashboard-glow-float {
+  pointer-events: none;
   animation:
     dashboard-steam-glow 9s ease-in-out infinite alternate,
     dashboard-glow-drift 20s ease-in-out infinite alternate;
@@ -272,6 +278,80 @@ body {
   }
   to {
     transform: translate3d(0, -8px, 0);
+  }
+}
+
+/* スマホ：背景の拡縮アニメーションを抑え、はみ出し・ガタつきを防ぐ */
+@media (max-width: 899.95px) {
+  .dashboard-bg-float {
+    inset: -1%;
+  }
+
+  .dashboard-stars-drift {
+    inset: -1%;
+  }
+
+  @keyframes dashboard-kenburns {
+    from {
+      transform: scale(1.01) translate3d(0, 0.15%, 0);
+    }
+    to {
+      transform: scale(1.03) translate3d(0, -0.25%, 0);
+    }
+  }
+
+  @keyframes kenburns {
+    from {
+      transform: scale(1);
+    }
+    to {
+      transform: scale(1.04);
+    }
+  }
+
+  @keyframes kenburns-rise {
+    from {
+      transform: scale(1.06) translateY(2%);
+    }
+    to {
+      transform: scale(1.06) translateY(-2%);
+    }
+  }
+
+  @keyframes kenburns-rise-hero {
+    from {
+      transform: scale(1.03) translateY(0.8%);
+    }
+    to {
+      transform: scale(1.03) translateY(-0.8%);
+    }
+  }
+
+  @keyframes kenburns-rise-starship {
+    from {
+      transform: scale(1.01) translateY(0.25%);
+    }
+    to {
+      transform: scale(1.02) translateY(-0.25%);
+    }
+  }
+
+  @keyframes dashboard-bg-drift {
+    from {
+      transform: translate3d(0, 0.3%, 0);
+    }
+    to {
+      transform: translate3d(0, -0.5%, 0);
+    }
+  }
+
+  @keyframes dashboard-stars-drift {
+    from {
+      transform: translate3d(0, 0.25%, 0);
+    }
+    to {
+      transform: translate3d(0, -0.4%, 0);
+    }
   }
 }
 
@@ -357,6 +437,497 @@ body {
   }
 }
 
+/* 診断中オーバーレイ（SF演出） */
+@keyframes diagnosis-overlay-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes diagnosis-orbit-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes diagnosis-dot-bounce {
+  0%,
+  80%,
+  100% {
+    transform: scale(0.65);
+    opacity: 0.45;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes diagnosis-cta-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.diagnosis-orbit-outer {
+  animation: diagnosis-orbit-spin 6s linear infinite;
+}
+
+.diagnosis-dot-pulse {
+  animation: diagnosis-dot-bounce 1.1s ease-in-out infinite;
+}
+
+.diagnosis-start-cta {
+  animation: diagnosis-cta-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* 診断待機：背景画像のゆっくりズーム＋パン */
+.diagnosis-analyzing-bg-kenburns {
+  animation: diagnosis-analyzing-kenburns 14s ease-in-out infinite alternate;
+  transform-origin: center center;
+}
+
+@keyframes diagnosis-analyzing-kenburns {
+  from {
+    transform: scale(1.08) translate3d(-1.2%, 0.8%, 0);
+  }
+  to {
+    transform: scale(1.18) translate3d(1.2%, -1.2%, 0);
+  }
+}
+
+.diagnosis-analyzing-bg-float {
+  animation: diagnosis-analyzing-drift 10s ease-in-out infinite alternate;
+}
+
+@keyframes diagnosis-analyzing-drift {
+  from {
+    transform: translate3d(-1%, 0.8%, 0);
+  }
+  to {
+    transform: translate3d(1.2%, -1%, 0);
+  }
+}
+
+/* 診断待機：CSS 星空（高密度）のパララックス＋きらめき */
+.diagnosis-analyzing-stars-drift-1 {
+  animation: diagnosis-analyzing-stars-drift-a 11s ease-in-out infinite alternate;
+}
+
+.diagnosis-analyzing-stars-drift-2 {
+  animation: diagnosis-analyzing-stars-drift-b 8s ease-in-out infinite alternate;
+}
+
+.diagnosis-analyzing-stars-drift-3 {
+  animation: diagnosis-analyzing-stars-drift-c 13s ease-in-out infinite alternate;
+}
+
+.diagnosis-analyzing-stars-drift-4 {
+  animation: diagnosis-analyzing-stars-drift-d 9s ease-in-out infinite alternate;
+}
+
+@keyframes diagnosis-analyzing-stars-drift-a {
+  from {
+    transform: translate3d(-2.5%, 1.8%, 0);
+  }
+  to {
+    transform: translate3d(3%, -2.5%, 0);
+  }
+}
+
+@keyframes diagnosis-analyzing-stars-drift-b {
+  from {
+    transform: translate3d(2.2%, -1.5%, 0);
+  }
+  to {
+    transform: translate3d(-2.8%, 2%, 0);
+  }
+}
+
+@keyframes diagnosis-analyzing-stars-drift-c {
+  from {
+    transform: translate3d(-1.8%, -1.2%, 0);
+  }
+  to {
+    transform: translate3d(2.4%, 1.6%, 0);
+  }
+}
+
+@keyframes diagnosis-analyzing-stars-drift-d {
+  from {
+    transform: translate3d(2%, 1.4%, 0);
+  }
+  to {
+    transform: translate3d(-2.6%, -1.8%, 0);
+  }
+}
+
+@keyframes diagnosis-analyzing-twinkle {
+  0%,
+  100% {
+    opacity: 0.62;
+  }
+  40% {
+    opacity: 1;
+  }
+  70% {
+    opacity: 0.78;
+  }
+}
+
+.diagnosis-analyzing-stars-1,
+.diagnosis-analyzing-stars-2,
+.diagnosis-analyzing-stars-3,
+.diagnosis-analyzing-stars-4 {
+  filter: brightness(1.2);
+}
+
+.diagnosis-analyzing-stars-1 {
+  background-size: 130px 130px !important;
+  animation: diagnosis-analyzing-twinkle 2.4s ease-in-out infinite,
+    diagnosis-stars-bg-pan 18s linear infinite;
+}
+
+.diagnosis-analyzing-stars-2 {
+  background-size: 160px 160px !important;
+  animation: diagnosis-analyzing-twinkle 3.1s ease-in-out infinite reverse,
+    diagnosis-stars-bg-pan-alt 14s linear infinite reverse;
+}
+
+.diagnosis-analyzing-stars-3 {
+  background-size: 240px 240px !important;
+  animation: diagnosis-analyzing-twinkle 2.8s ease-in-out infinite,
+    diagnosis-stars-bg-pan-base 20s linear infinite;
+}
+
+.diagnosis-analyzing-stars-4 {
+  background-size: 130px 130px !important;
+  animation: diagnosis-analyzing-twinkle 3.4s ease-in-out infinite reverse,
+    diagnosis-stars-bg-pan-extra 16s linear infinite;
+}
+
+@keyframes diagnosis-stars-bg-pan {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 130px 130px;
+  }
+}
+
+@keyframes diagnosis-stars-bg-pan-alt {
+  from {
+    background-position: 40px 30px;
+  }
+  to {
+    background-position: 200px 190px;
+  }
+}
+
+@keyframes diagnosis-stars-bg-pan-base {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 240px 240px;
+  }
+}
+
+@keyframes diagnosis-stars-bg-pan-extra {
+  from {
+    background-position: 65px 45px;
+  }
+  to {
+    background-position: 195px 175px;
+  }
+}
+
+.diagnosis-analyzing-glow {
+  animation: diagnosis-analyzing-glow 2.2s ease-in-out infinite alternate;
+}
+
+@keyframes diagnosis-analyzing-glow {
+  from {
+    opacity: 0.72;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.diagnosis-orbit-inner {
+  animation: diagnosis-orbit-spin-reverse 3.5s linear infinite;
+}
+
+@keyframes diagnosis-orbit-spin-reverse {
+  from {
+    transform: rotate(360deg);
+  }
+  to {
+    transform: rotate(0deg);
+  }
+}
+
+.diagnosis-core-pulse {
+  animation: diagnosis-core-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes diagnosis-core-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 0.85;
+  }
+}
+
+@media (max-width: 899.95px) {
+  @keyframes diagnosis-analyzing-kenburns {
+    from {
+      transform: scale(1.06) translate3d(-0.8%, 0.5%, 0);
+    }
+    to {
+      transform: scale(1.12) translate3d(0.8%, -0.8%, 0);
+    }
+  }
+
+  @keyframes diagnosis-analyzing-stars-drift-a {
+    from {
+      transform: translate3d(-1.8%, 1.2%, 0);
+    }
+    to {
+      transform: translate3d(2.2%, -1.6%, 0);
+    }
+  }
+
+  @keyframes diagnosis-analyzing-stars-drift-b {
+    from {
+      transform: translate3d(1.5%, -1%, 0);
+    }
+    to {
+      transform: translate3d(-2%, 1.4%, 0);
+    }
+  }
+
+  @keyframes diagnosis-analyzing-stars-drift-c {
+    from {
+      transform: translate3d(-1.2%, -0.8%, 0);
+    }
+    to {
+      transform: translate3d(1.6%, 1%, 0);
+    }
+  }
+
+  @keyframes diagnosis-analyzing-stars-drift-d {
+    from {
+      transform: translate3d(1.4%, 0.9%, 0);
+    }
+    to {
+      transform: translate3d(-1.8%, -1.2%, 0);
+    }
+  }
+}
+
+/* 有料プラン限定グラフ — ぼかし＋市松模様のモザイク */
+.premium-locked-charts {
+  filter: blur(7px) saturate(0.55) brightness(0.8);
+}
+
+.premium-locked-action-btn {
+  animation: premium-locked-action-glow 2.4s ease-in-out infinite;
+}
+
+@keyframes premium-locked-action-glow {
+  0%,
+  100% {
+    box-shadow:
+      0 0 16px rgba(56, 123, 255, 0.15),
+      inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  }
+  50% {
+    box-shadow:
+      0 0 24px rgba(56, 123, 255, 0.32),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+}
+
+.premium-sandstorm-layer {
+  opacity: 0.84;
+  mix-blend-mode: normal;
+}
+
+.premium-mosaic-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background-color: rgb(120, 120, 120);
+  background-image: repeating-conic-gradient(
+    rgb(20, 20, 20) 0deg 90deg,
+    rgb(235, 235, 235) 90deg 180deg,
+    rgb(70, 70, 70) 180deg 270deg,
+    rgb(180, 180, 180) 270deg 360deg
+  );
+  background-size: 12px 12px;
+  opacity: 0.82;
+}
+
+.premium-upgrade-card {
+  animation: premium-lock-glow 2.4s ease-in-out infinite;
+}
+
+@keyframes premium-lock-glow {
+  0%,
+  100% {
+    box-shadow:
+      0 0 24px rgba(56, 123, 255, 0.22),
+      0 16px 48px rgba(0, 0, 0, 0.45);
+    border-color: rgba(96, 165, 250, 0.35);
+  }
+  50% {
+    box-shadow:
+      0 0 48px rgba(56, 123, 255, 0.55),
+      0 20px 56px rgba(56, 123, 255, 0.18);
+    border-color: rgba(147, 197, 253, 0.75);
+  }
+}
+
+.premium-lock-icon {
+  animation: premium-lock-bounce 2s ease-in-out infinite;
+}
+
+@keyframes premium-lock-bounce {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-5px) scale(1.05);
+  }
+}
+
+.free-plan-badge {
+  animation:
+    free-plan-badge-shimmer 2.6s ease-in-out infinite,
+    free-plan-badge-glow 2.1s ease-in-out infinite;
+}
+
+@keyframes free-plan-badge-shimmer {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes free-plan-badge-glow {
+  0%,
+  100% {
+    box-shadow:
+      0 0 14px rgba(245, 158, 11, 0.42),
+      0 0 0 0 rgba(251, 191, 36, 0.35);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow:
+      0 0 22px rgba(245, 158, 11, 0.62),
+      0 0 0 7px rgba(251, 191, 36, 0);
+    transform: scale(1.04);
+  }
+}
+
+.plan-upgrade-notice-highlight {
+  animation:
+    plan-upgrade-notice-shimmer 2.8s ease-in-out infinite,
+    plan-upgrade-notice-glow 2.2s ease-in-out infinite;
+}
+
+.plan-upgrade-notice-icon {
+  animation: plan-upgrade-notice-icon-pulse 2.2s ease-in-out infinite;
+}
+
+@keyframes plan-upgrade-notice-shimmer {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes plan-upgrade-notice-glow {
+  0%,
+  100% {
+    box-shadow:
+      0 0 20px rgba(56, 123, 255, 0.22),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      0 0 0 0 rgba(34, 211, 238, 0.28);
+  }
+  50% {
+    box-shadow:
+      0 0 28px rgba(56, 123, 255, 0.38),
+      inset 0 1px 0 rgba(255, 255, 255, 0.14),
+      0 0 0 6px rgba(34, 211, 238, 0);
+  }
+}
+
+@keyframes plan-upgrade-notice-icon-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 14px rgba(56, 123, 255, 0.35);
+  }
+  50% {
+    transform: scale(1.06);
+    box-shadow: 0 0 22px rgba(34, 211, 238, 0.55);
+  }
+}
+
+.premium-upgrade-badge {
+  animation: premium-badge-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes premium-badge-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(56, 123, 255, 0.35);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(56, 123, 255, 0);
+  }
+}
+
+.premium-upgrade-btn {
+  background-size: 220% 100%;
+  animation: premium-cta-shimmer 2.8s linear infinite;
+}
+
+@keyframes premium-cta-shimmer {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 220% 50%;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -375,6 +946,37 @@ body {
   .dashboard-glow-float,
   .stars-dashboard,
   .dashboard-content-float {
+    animation: none;
+  }
+  .diagnosis-orbit-outer,
+  .diagnosis-orbit-inner,
+  .diagnosis-core-pulse,
+  .diagnosis-dot-pulse,
+  .diagnosis-start-cta,
+  .diagnosis-analyzing-bg-kenburns,
+  .diagnosis-analyzing-bg-float,
+  .diagnosis-analyzing-stars-drift-1,
+  .diagnosis-analyzing-stars-drift-2,
+  .diagnosis-analyzing-stars-drift-3,
+  .diagnosis-analyzing-stars-drift-4,
+  .diagnosis-analyzing-stars-1,
+  .diagnosis-analyzing-stars-2,
+  .diagnosis-analyzing-stars-3,
+  .diagnosis-analyzing-stars-4,
+  .diagnosis-analyzing-glow {
+    animation: none;
+  }
+  .premium-locked-charts,
+  .premium-mosaic-layer,
+  .premium-sandstorm-layer,
+  .premium-upgrade-card,
+  .premium-lock-icon,
+  .premium-upgrade-badge,
+  .premium-upgrade-btn,
+  .free-plan-badge,
+  .plan-upgrade-notice-highlight,
+  .plan-upgrade-notice-icon,
+  .premium-locked-action-btn {
     animation: none;
   }
   .hero-headline-line {

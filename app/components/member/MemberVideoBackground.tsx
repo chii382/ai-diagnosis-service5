@@ -62,7 +62,10 @@ export default function MemberVideoBackground({ src }: MemberVideoBackgroundProp
           width: "100%",
           height: "100%",
           objectFit: "cover",
-          objectPosition: "center center",
+          objectPosition: {
+            xs: "center 28%",
+            md: "center center",
+          },
         }}
       />
 

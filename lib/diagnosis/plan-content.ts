@@ -1,0 +1,121 @@
+import type {
+  CareerRoadmap,
+  CareerRoadmapBrief,
+  CareerRoadmapPhase,
+  CareerRoadmapPhaseBrief,
+  DiagnosisDocument,
+  DiagnosisResult,
+  DiagnosisResultBrief,
+} from "@/lib/diagnosis/types";
+import { canViewPremiumContent, type UserPlan } from "@/lib/plan";
+
+function truncate(text: string, maxLength: number): string {
+  const trimmed = text.trim();
+  if (trimmed.length <= maxLength) return trimmed;
+  return `${trimmed.slice(0, maxLength - 1)}…`;
+}
+
+function normalizeLegacyBriefPhase(
+  phase: CareerRoadmapPhaseBrief & { goal?: string },
+): CareerRoadmapPhaseBrief {
+  if (phase.overview?.trim()) {
+    return {
+      period: phase.period,
+      overview: phase.overview.trim(),
+      highlights: phase.highlights ?? [],
+    };
+  }
+  if (phase.goal?.trim()) {
+    return {
+      period: phase.period,
+      overview: phase.goal.trim(),
+      highlights: [],
+    };
+  }
+  return phase;
+}
+
+function derivePhaseBrief(phase: CareerRoadmapPhase): CareerRoadmapPhaseBrief {
+  const primaryGoal = phase.goals[0] ?? "キャリアの方向性を明確にする";
+  const secondaryGoal = phase.goals[1];
+  const primaryAction = phase.actions[0];
+
+  const overview = truncate(
+    [
+      `この期間は、${primaryGoal.replace(/。$/, "")}ことを重点テーマとして進めます。`,
+      secondaryGoal
+        ? `あわせて${secondaryGoal.replace(/。$/, "")}方向への成長も視野に入れ、次のステップへつなげていきます。`
+        : primaryAction
+          ? `特に${primaryAction.replace(/。$/, "")}などが、この時期の核となる取り組みです。`
+          : "方向性を固めながら、次のフェーズへの準備を進めます。",
+    ].join(""),
+    120,
+  );
+
+  const highlights = [
+    truncate(primaryGoal, 40),
+    truncate(secondaryGoal ?? primaryAction ?? primaryGoal, 40),
+  ].filter((item, index, arr) => item && arr.indexOf(item) === index);
+
+  return {
+    period: phase.period,
+    overview,
+    highlights: highlights.slice(0, 2),
+  };
+}
+
+export function deriveResultBrief(result: DiagnosisResult): DiagnosisResultBrief {
+  return {
+    summary: truncate(result.summary, 100),
+    strengths: result.strengths.slice(0, 1),
+    recommendedDirections: result.recommendedDirections.slice(0, 1),
+    advice: truncate(result.advice, 80),
+  };
+}
+
+export function deriveRoadmapBrief(roadmap: CareerRoadmap): CareerRoadmapBrief {
+  return {
+    shortTerm: derivePhaseBrief(roadmap.shortTerm),
+    midTerm: derivePhaseBrief(roadmap.midTerm),
+    longTerm: derivePhaseBrief(roadmap.longTerm),
+  };
+}
+
+export function resolveResultBrief(diagnosis: DiagnosisDocument): DiagnosisResultBrief {
+  return diagnosis.resultBrief ?? deriveResultBrief(diagnosis.result);
+}
+
+export function resolveRoadmapBrief(diagnosis: DiagnosisDocument): CareerRoadmapBrief {
+  const brief = diagnosis.careerRoadmapBrief ?? deriveRoadmapBrief(diagnosis.careerRoadmap);
+  return {
+    shortTerm: normalizeLegacyBriefPhase(brief.shortTerm),
+    midTerm: normalizeLegacyBriefPhase(brief.midTerm),
+    longTerm: normalizeLegacyBriefPhase(brief.longTerm),
+  };
+}
+
+export function getResultForPlan(
+  diagnosis: DiagnosisDocument,
+  _plan: UserPlan,
+): DiagnosisResult {
+  return diagnosis.result;
+}
+
+export function getRoadmapForPlan(
+  diagnosis: DiagnosisDocument,
+  plan: UserPlan,
+): CareerRoadmap | CareerRoadmapBrief {
+  if (canViewPremiumContent(plan)) return diagnosis.careerRoadmap;
+  return resolveRoadmapBrief(diagnosis);
+}
+
+export function isDetailedRoadmap(
+  roadmap: CareerRoadmap | CareerRoadmapBrief,
+): roadmap is CareerRoadmap {
+  return "goals" in roadmap.shortTerm;
+}
+
+export const FREE_PLAN_ROADMAP_NOTICE = {
+  intro: "無料プランでは各期間の方針概要を表示しています。",
+  highlight: "有料プランでは、目標と具体的アクションを含む詳細ロードマップを確認できます。",
+} as const;

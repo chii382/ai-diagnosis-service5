@@ -6,14 +6,19 @@ import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Container from "@mui/material/Container";
-import Grid from "@mui/material/Grid2";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import Avatar from "@mui/material/Avatar";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
+import PsychologyOutlinedIcon from "@mui/icons-material/PsychologyOutlined";
+import HistoryOutlinedIcon from "@mui/icons-material/HistoryOutlined";
+import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import MemberNav from "@/app/components/member/MemberNav";
 import MemberCinematicBackground from "@/app/components/member/MemberCinematicBackground";
+import { getDefaultUserPlan, getPlanLabel } from "@/lib/plan";
+import { jpTextSx } from "@/lib/typography";
 
 export const metadata = {
   title: "ダッシュボード | AIキャリア診断",
@@ -35,6 +40,23 @@ const glassCardSx = {
   },
 } as const;
 
+const linkButtonSx = {
+  justifyContent: "center",
+  py: 1.1,
+  px: 2.25,
+  minWidth: { xs: "100%", sm: 220 },
+  color: "rgba(255,255,255,0.88)",
+  borderRadius: 2,
+  border: "1px solid rgba(255,255,255,0.1)",
+  backgroundColor: "rgba(255,255,255,0.04)",
+  fontSize: { xs: "0.84rem", sm: "0.875rem" },
+  whiteSpace: "nowrap",
+  "&:hover": {
+    backgroundColor: "rgba(56,123,255,0.12)",
+    borderColor: "rgba(96,165,250,0.35)",
+  },
+} as const;
+
 export default async function DashboardPage() {
   const session = await auth();
   if (!session?.user) {
@@ -42,9 +64,11 @@ export default async function DashboardPage() {
   }
 
   const { user } = session;
+  const plan = getDefaultUserPlan();
+  const planLabel = getPlanLabel(plan);
 
   return (
-    <Box sx={{ position: "relative", minHeight: "100svh", overflow: "hidden" }}>
+    <Box sx={{ position: "relative", minHeight: "100svh", overflowX: "hidden" }}>
       <MemberCinematicBackground />
 
       <Box className="dashboard-content-float" sx={{ position: "relative", zIndex: 1 }}>
@@ -93,13 +117,13 @@ export default async function DashboardPage() {
                 }}
               >
                 <Box component="span" sx={{ display: "block" }}>
-                  会員専用エリアへようこそ。
-                </Box>
-                <Box component="span" sx={{ display: "block" }}>
-                  診断結果の確認、プロフィールの編集はこちらから。
+                  まずはプロフィールを入力してから、キャリア診断を始めましょう。
                 </Box>
                 <Box component="span" sx={{ display: "block" }}>
                   情報が増えるほど、あなたへの提案はより的確になります。
+                </Box>
+                <Box component="span" sx={{ display: "block" }}>
+                  診断結果の確認や履歴の参照も、こちらから行えます。
                 </Box>
               </Typography>
               <Typography
@@ -113,154 +137,280 @@ export default async function DashboardPage() {
               </Typography>
             </Stack>
 
-            <Grid container spacing={2.5}>
-              <Grid size={{ xs: 12, md: 6 }}>
-                <Card sx={glassCardSx}>
-                  <CardContent sx={{ p: { xs: 2.5, md: 3 } }}>
-                    <Stack spacing={2.5}>
-                      <Typography
-                        sx={{
-                          color: "rgba(255,255,255,0.5)",
-                          fontSize: "0.68rem",
-                          fontWeight: 600,
-                          letterSpacing: "0.28em",
-                        }}
-                      >
-                        YOUR PROFILE
-                      </Typography>
-                      <Stack direction="row" spacing={2} alignItems="center">
-                        <Avatar
-                          src={user.image ?? undefined}
-                          alt={user.name ?? "ユーザー"}
-                          sx={{
-                            width: 64,
-                            height: 64,
-                            border: "2px solid rgba(255,255,255,0.18)",
-                            boxShadow: "0 0 24px rgba(56,123,255,0.2)",
-                          }}
-                        />
-                        <Box>
-                          <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                            {user.name ?? "未設定"}
-                          </Typography>
-                          <Typography variant="body2" sx={{ color: "rgba(255,255,255,0.65)" }}>
-                            {user.email}
-                          </Typography>
-                        </Box>
-                      </Stack>
+            <Stack spacing={{ xs: 2, md: 2.5 }}>
+            <Card sx={{ ...glassCardSx, height: "auto" }}>
+              <CardContent sx={{ p: { xs: 2.5, md: 3 } }}>
+                <Stack spacing={2.5}>
+                  <Stack spacing={0.75}>
+                    <Typography
+                      sx={{
+                        color: "rgba(255,255,255,0.5)",
+                        fontSize: "0.68rem",
+                        fontWeight: 600,
+                        letterSpacing: "0.28em",
+                      }}
+                    >
+                      YOUR PROFILE
+                    </Typography>
+                    <Typography
+                      sx={{
+                        color: "rgba(255,255,255,0.72)",
+                        fontSize: { xs: "0.85rem", md: "0.92rem" },
+                        lineHeight: 1.7,
+                      }}
+                    >
+                      プロフィールを入力すると、診断結果の精度が上がります。診断の前にご確認ください。
+                    </Typography>
+                  </Stack>
 
-                      <Box
-                        sx={{
-                          p: { xs: 2, md: 2.25 },
-                          borderRadius: 2.5,
-                          background:
-                            "linear-gradient(135deg, rgba(56,123,255,0.32) 0%, rgba(34,211,238,0.14) 48%, rgba(99,102,241,0.1) 100%)",
-                          border: "1px solid rgba(147,197,253,0.55)",
-                          boxShadow:
-                            "0 0 36px rgba(56,123,255,0.22), inset 0 1px 0 rgba(255,255,255,0.14)",
-                        }}
+                  <Stack direction="row" spacing={2} alignItems="flex-start">
+                    <Avatar
+                      src={user.image ?? undefined}
+                      alt={user.name ?? "ユーザー"}
+                      sx={{
+                        width: 72,
+                        height: 72,
+                        border: "2px solid rgba(255,255,255,0.18)",
+                        boxShadow: "0 0 24px rgba(56,123,255,0.2)",
+                        flexShrink: 0,
+                      }}
+                    />
+                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                      <Stack
+                        direction="row"
+                        spacing={2.5}
+                        alignItems="center"
+                        flexWrap="wrap"
+                        useFlexGap
+                        sx={{ mb: 0.75, rowGap: 1 }}
                       >
-                        <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1 }}>
+                        <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.3 }}>
+                          {user.name ?? "未設定"}
+                        </Typography>
+                        <Box
+                          sx={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: 0.75,
+                            px: 1.1,
+                            py: 0.45,
+                            borderRadius: 999,
+                            border: "1px solid rgba(147,197,253,0.42)",
+                            background:
+                              "linear-gradient(135deg, rgba(56,123,255,0.22) 0%, rgba(34,211,238,0.1) 100%)",
+                            boxShadow: "0 0 14px rgba(56,123,255,0.12)",
+                          }}
+                        >
                           <Box
                             aria-hidden
                             sx={{
-                              width: 9,
-                              height: 9,
+                              width: 7,
+                              height: 7,
                               borderRadius: "50%",
                               flexShrink: 0,
                               backgroundColor: "#4ade80",
-                              boxShadow: "0 0 12px rgba(74,222,128,0.85)",
+                              boxShadow: "0 0 8px rgba(74,222,128,0.85)",
                             }}
                           />
                           <Typography
                             sx={{
-                              fontSize: "0.72rem",
+                              ...jpTextSx,
+                              fontSize: "0.78rem",
                               fontWeight: 600,
-                              letterSpacing: "0.14em",
-                              color: "rgba(255,255,255,0.82)",
+                              color: "rgba(255,255,255,0.92)",
+                              lineHeight: 1.2,
+                              whiteSpace: "nowrap",
                             }}
                           >
-                            ご利用中のプラン
+                            {`ご利用中 ${planLabel}`}
                           </Typography>
-                        </Stack>
-                        <Typography
-                          sx={{
-                            fontSize: { xs: "1.2rem", md: "1.3rem" },
-                            fontWeight: 700,
-                            color: "#fff",
-                            letterSpacing: "0.06em",
-                            textShadow: "0 0 24px rgba(147,197,253,0.45)",
-                          }}
-                        >
-                          無料プラン
-                        </Typography>
-                      </Box>
-                    </Stack>
-                  </CardContent>
-                </Card>
-              </Grid>
-
-              <Grid size={{ xs: 12, md: 6 }}>
-                <Card sx={glassCardSx}>
-                  <CardContent sx={{ p: { xs: 2.5, md: 3 } }}>
-                    <Stack spacing={2}>
-                      <Typography
-                        sx={{
-                          color: "rgba(255,255,255,0.5)",
-                          fontSize: "0.68rem",
-                          fontWeight: 600,
-                          letterSpacing: "0.28em",
-                        }}
-                      >
-                        LINKS
-                      </Typography>
-                      <Stack spacing={1}>
-                        <Button
-                          component={Link}
-                          href="/profile"
-                          startIcon={<PersonOutlineIcon />}
-                          sx={{
-                            justifyContent: "flex-start",
-                            py: 1.25,
-                            px: 1.5,
-                            color: "rgba(255,255,255,0.9)",
-                            borderRadius: 2,
-                            border: "1px solid rgba(255,255,255,0.08)",
-                            backgroundColor: "rgba(255,255,255,0.03)",
-                            "&:hover": {
-                              backgroundColor: "rgba(56,123,255,0.12)",
-                              borderColor: "rgba(96,165,250,0.3)",
-                            },
-                          }}
-                        >
-                          プロフィール設定
-                        </Button>
-                        <Button
-                          component={Link}
-                          href="/"
-                          startIcon={<HomeOutlinedIcon />}
-                          sx={{
-                            justifyContent: "flex-start",
-                            py: 1.25,
-                            px: 1.5,
-                            color: "rgba(255,255,255,0.9)",
-                            borderRadius: 2,
-                            border: "1px solid rgba(255,255,255,0.08)",
-                            backgroundColor: "rgba(255,255,255,0.03)",
-                            "&:hover": {
-                              backgroundColor: "rgba(56,123,255,0.12)",
-                              borderColor: "rgba(96,165,250,0.3)",
-                            },
-                          }}
-                        >
-                          トップページ（LP）へ戻る
-                        </Button>
+                        </Box>
                       </Stack>
-                    </Stack>
-                  </CardContent>
-                </Card>
-              </Grid>
-            </Grid>
+                      <Typography variant="body2" sx={{ color: "rgba(255,255,255,0.65)" }}>
+                        {user.email}
+                      </Typography>
+                    </Box>
+                  </Stack>
+
+                  <Button
+                    component={Link}
+                    href="/profile"
+                    variant="outlined"
+                    fullWidth
+                    startIcon={<PersonOutlineIcon />}
+                    sx={{
+                      justifyContent: "flex-start",
+                      py: 1.35,
+                      px: 2,
+                      borderRadius: 2,
+                      borderColor: "rgba(96,165,250,0.5)",
+                      color: "rgba(255,255,255,0.92)",
+                      backgroundColor: "rgba(56,123,255,0.12)",
+                      fontWeight: 600,
+                      "&:hover": {
+                        borderColor: "rgba(147,197,253,0.75)",
+                        backgroundColor: "rgba(56,123,255,0.2)",
+                        boxShadow: "0 0 24px rgba(56,123,255,0.18)",
+                      },
+                    }}
+                  >
+                    プロフィール設定
+                  </Button>
+                </Stack>
+              </CardContent>
+            </Card>
+
+            <Box
+              component={Link}
+              href="/diagnosis"
+              sx={{
+                display: "block",
+                textDecoration: "none",
+                color: "inherit",
+                borderRadius: 3,
+                overflow: "hidden",
+                position: "relative",
+                border: "1px solid rgba(147,197,253,0.45)",
+                background:
+                  "linear-gradient(135deg, rgba(56,123,255,0.38) 0%, rgba(34,211,238,0.16) 42%, rgba(56,123,255,0.22) 100%)",
+                boxShadow:
+                  "0 12px 56px rgba(56,123,255,0.32), inset 0 1px 0 rgba(255,255,255,0.14)",
+                transition: "transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease",
+                "@media (hover: hover)": {
+                  "&:hover": {
+                    transform: "translateY(-3px)",
+                    borderColor: "rgba(147,197,253,0.65)",
+                    boxShadow:
+                      "0 20px 64px rgba(56,123,255,0.42), inset 0 1px 0 rgba(255,255,255,0.18)",
+                  },
+                },
+                "&::before": {
+                  content: '""',
+                  position: "absolute",
+                  inset: 0,
+                  background:
+                    "radial-gradient(ellipse 55% 80% at 100% 50%, rgba(34,211,238,0.22), transparent 58%)",
+                  pointerEvents: "none",
+                },
+              }}
+            >
+              <Stack
+                direction={{ xs: "column", sm: "row" }}
+                spacing={{ xs: 2.5, sm: 3 }}
+                alignItems={{ xs: "flex-start", sm: "center" }}
+                justifyContent="space-between"
+                sx={{ position: "relative", p: { xs: 2.5, md: 3.25 } }}
+              >
+                <Stack direction="row" spacing={2} alignItems="flex-start" sx={{ flex: 1 }}>
+                  <Box
+                    sx={{
+                      width: { xs: 52, md: 60 },
+                      height: { xs: 52, md: 60 },
+                      borderRadius: 2.5,
+                      flexShrink: 0,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      background:
+                        "linear-gradient(135deg, rgba(56,123,255,0.55) 0%, rgba(34,211,238,0.35) 100%)",
+                      border: "1px solid rgba(147,197,253,0.5)",
+                      boxShadow: "0 0 28px rgba(56,123,255,0.35)",
+                    }}
+                  >
+                    <PsychologyOutlinedIcon sx={{ fontSize: { xs: 28, md: 32 }, color: "#fff" }} />
+                  </Box>
+                  <Stack spacing={0.75}>
+                    <Typography
+                      sx={{
+                        color: "rgba(255,255,255,0.65)",
+                        fontSize: "0.68rem",
+                        fontWeight: 600,
+                        letterSpacing: "0.28em",
+                      }}
+                    >
+                      CORE FEATURE
+                    </Typography>
+                    <Typography
+                      variant="h5"
+                      sx={{
+                        fontWeight: 800,
+                        fontSize: { xs: "1.25rem", md: "1.45rem" },
+                        lineHeight: 1.35,
+                        textShadow: "0 0 24px rgba(56,123,255,0.35)",
+                      }}
+                    >
+                      キャリア診断を始める
+                    </Typography>
+                    <Typography
+                      sx={{
+                        ...jpTextSx,
+                        color: "rgba(255,255,255,0.78)",
+                        fontSize: { xs: "0.82rem", sm: "0.88rem", md: "0.95rem" },
+                        lineHeight: 1.7,
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      5問・約3分で、AIがあなた専用の強み分析とキャリアロードマップを生成します。
+                    </Typography>
+                  </Stack>
+                </Stack>
+
+                <Button
+                  variant="contained"
+                  size="large"
+                  endIcon={<ArrowForwardIcon />}
+                  startIcon={<AutoAwesomeIcon />}
+                  tabIndex={-1}
+                  sx={{
+                    alignSelf: { xs: "stretch", sm: "center" },
+                    py: 1.35,
+                    px: { xs: 2.5, md: 3 },
+                    fontWeight: 800,
+                    fontSize: { xs: "0.92rem", md: "1rem" },
+                    whiteSpace: "nowrap",
+                    borderRadius: 2.5,
+                    background: "linear-gradient(90deg, #387bff 0%, #22d3ee 100%)",
+                    boxShadow: "0 8px 32px rgba(56,123,255,0.45)",
+                    "&:hover": {
+                      background: "linear-gradient(90deg, #4d8bff 0%, #3dd9f0 100%)",
+                      boxShadow: "0 12px 40px rgba(56,123,255,0.55)",
+                    },
+                  }}
+                >
+                  診断を始める
+                </Button>
+              </Stack>
+            </Box>
+            </Stack>
+
+            <Box sx={{ maxWidth: 720, width: "100%" }}>
+              <Stack
+                direction={{ xs: "column", sm: "row" }}
+                spacing={1.25}
+                useFlexGap
+                sx={{
+                  pt: { xs: 0.5, md: 1 },
+                  justifyContent: { sm: "flex-start" },
+                }}
+              >
+                <Button
+                  component={Link}
+                  href="/diagnosis/history"
+                  startIcon={<HistoryOutlinedIcon />}
+                  sx={linkButtonSx}
+                >
+                  診断履歴を見る
+                </Button>
+                <Button
+                  component={Link}
+                  href="/"
+                  startIcon={<HomeOutlinedIcon />}
+                  sx={linkButtonSx}
+                >
+                  トップページ（LP）へ戻る
+                </Button>
+              </Stack>
+            </Box>
           </Stack>
         </Container>
       </Box>

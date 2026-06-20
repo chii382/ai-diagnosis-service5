@@ -4,12 +4,18 @@ interface PanelBackgroundProps {
   src: string;
   overlay: string;
   position?: string;
+  mobilePosition?: string;
+  backgroundSize?: string;
+  mobileBackgroundSize?: string;
 }
 
 export default function PanelBackground({
   src,
   overlay,
   position = "center",
+  mobilePosition,
+  backgroundSize = "cover",
+  mobileBackgroundSize = "auto 100%",
 }: PanelBackgroundProps) {
   return (
     <>
@@ -20,8 +26,11 @@ export default function PanelBackground({
           position: "absolute",
           inset: 0,
           backgroundImage: `url(${src})`,
-          backgroundSize: "cover",
-          backgroundPosition: position,
+          backgroundSize: { xs: mobileBackgroundSize, md: backgroundSize },
+          backgroundPosition: {
+            xs: mobilePosition ?? position,
+            md: position,
+          },
           backgroundRepeat: "no-repeat",
         }}
       />

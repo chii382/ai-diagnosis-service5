@@ -42,7 +42,7 @@ export default async function ProfilePage() {
   };
 
   return (
-    <Box sx={{ position: "relative", minHeight: "100svh", overflow: "hidden" }}>
+    <Box sx={{ position: "relative", minHeight: "100svh", overflowX: "hidden" }}>
       <MemberVideoBackground src="/videos/profile-bg.mp4" />
 
       <Box sx={{ position: "relative", zIndex: 1 }}>

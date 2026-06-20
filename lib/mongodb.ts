@@ -36,3 +36,8 @@ export async function getUsersCollection() {
   const client = await getMongoClientPromise();
   return client.db().collection("users");
 }
+
+export async function getDiagnosesCollection() {
+  const client = await getMongoClientPromise();
+  return client.db().collection("diagnoses");
+}

@@ -25,6 +25,8 @@ export default function CTASection() {
       <CosmicVideoBackground
         image="/images/cta-cosmos.png"
         position="center top"
+        mobilePosition="center 12%"
+        mobileBackgroundSize="auto 100%"
         rise
         overlay="linear-gradient(180deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.55) 24%, rgba(0,0,0,0.12) 45%, rgba(0,0,0,0) 66%, rgba(0,0,0,0.25) 100%)"
       />

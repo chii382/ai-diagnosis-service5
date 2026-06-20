@@ -1,25 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import Link from "next/link";
 import Button, { ButtonProps } from "@mui/material/Button";
-import Snackbar from "@mui/material/Snackbar";
-import Alert from "@mui/material/Alert";
 
 type Appearance = "solid" | "outline";
 
 interface CTAButtonProps extends Omit<ButtonProps, "variant"> {
   label?: string;
   appearance?: Appearance;
+  href?: string;
 }
 
 export default function CTAButton({
   label = "無料で診断する",
   appearance = "solid",
+  href = "/diagnosis",
   sx,
   ...rest
 }: CTAButtonProps) {
-  const [open, setOpen] = useState(false);
-
   const appearanceSx =
     appearance === "solid"
       ? {
@@ -41,40 +39,24 @@ export default function CTAButton({
         };
 
   return (
-    <>
-      <Button
-        onClick={() => setOpen(true)}
-        disableElevation
-        sx={{
-          px: { xs: 3.5, md: 4.5 },
-          py: { xs: 1.1, md: 1.35 },
-          fontSize: { xs: "0.8rem", md: "0.875rem" },
-          fontWeight: 600,
-          letterSpacing: "0.12em",
-          textTransform: "uppercase",
-          borderRadius: "3px",
-          ...appearanceSx,
-          ...sx,
-        }}
-        {...rest}
-      >
-        {label}
-      </Button>
-      <Snackbar
-        open={open}
-        autoHideDuration={3000}
-        onClose={() => setOpen(false)}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-      >
-        <Alert
-          onClose={() => setOpen(false)}
-          severity="info"
-          variant="filled"
-          sx={{ width: "100%" }}
-        >
-          Coming Soon（近日公開予定です）
-        </Alert>
-      </Snackbar>
-    </>
+    <Button
+      component={Link}
+      href={href}
+      disableElevation
+      sx={{
+        px: { xs: 3.5, md: 4.5 },
+        py: { xs: 1.1, md: 1.35 },
+        fontSize: { xs: "0.8rem", md: "0.875rem" },
+        fontWeight: 600,
+        letterSpacing: "0.12em",
+        textTransform: "uppercase",
+        borderRadius: "3px",
+        ...appearanceSx,
+        ...sx,
+      }}
+      {...rest}
+    >
+      {label}
+    </Button>
   );
 }

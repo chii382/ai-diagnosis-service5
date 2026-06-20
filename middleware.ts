@@ -7,7 +7,9 @@ export default NextAuth(authConfig).auth((req) => {
   const { pathname } = req.nextUrl;
 
   const isProtected =
-    pathname.startsWith("/dashboard") || pathname.startsWith("/profile");
+    pathname.startsWith("/dashboard") ||
+    pathname.startsWith("/profile") ||
+    pathname.startsWith("/diagnosis");
 
   if (isProtected && !isLoggedIn) {
     const signInUrl = new URL("/auth/signin", req.url);
@@ -19,5 +21,5 @@ export default NextAuth(authConfig).auth((req) => {
 });
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/profile/:path*"],
+  matcher: ["/dashboard/:path*", "/profile/:path*", "/diagnosis/:path*"],
 };

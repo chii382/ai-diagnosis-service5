@@ -1,35 +1,39 @@
 import Box from "@mui/material/Box";
 import CosmicStarCanvas from "@/app/components/common/CosmicStarCanvas";
 
-/** 会員ダッシュボード用。宇宙飛行士ヒーロー・シネマティック背景 */
+/** 会員ダッシュボード用。宇宙飛行士ヒーロー・シネマティック背景（親で fixed + pointer-events:none を付ける） */
 export default function MemberCinematicBackground() {
   return (
     <Box
       aria-hidden
       sx={{
-        position: "fixed",
+        position: "absolute",
         inset: 0,
-        zIndex: 0,
         pointerEvents: "none",
         backgroundColor: "#000",
         overflow: "hidden",
       }}
     >
-      <Box className="dashboard-bg-float">
+      <Box className="dashboard-bg-float" sx={{ pointerEvents: "none" }}>
         <Box
           className="bg-dashboard-cinematic"
           sx={{
             position: "absolute",
             inset: 0,
+            pointerEvents: "none",
             backgroundImage: "url(/images/dashboard-hero.png)",
-            backgroundSize: "cover",
+            backgroundSize: { xs: "auto 100%", sm: "auto 105%", md: "cover" },
             backgroundRepeat: "no-repeat",
-            backgroundPosition: "center center",
+            backgroundPosition: {
+              xs: "24% center",
+              sm: "32% center",
+              md: "center center",
+            },
           }}
         />
       </Box>
 
-      <Box className="dashboard-stars-drift">
+      <Box className="dashboard-stars-drift" sx={{ pointerEvents: "none" }}>
         <CosmicStarCanvas
           density={1.9}
           twinkleIntensity={1.35}
@@ -46,8 +50,11 @@ export default function MemberCinematicBackground() {
         sx={{
           position: "absolute",
           inset: 0,
-          background:
-            "linear-gradient(180deg, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.52) 16%, rgba(0,0,0,0.24) 34%, rgba(0,0,0,0.12) 54%, rgba(0,0,0,0.2) 78%, rgba(0,0,0,0.42) 100%)",
+          pointerEvents: "none",
+          background: {
+            xs: "linear-gradient(180deg, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.58) 18%, rgba(0,0,0,0.28) 36%, rgba(0,0,0,0.16) 54%, rgba(0,0,0,0.24) 78%, rgba(0,0,0,0.48) 100%)",
+            md: "linear-gradient(180deg, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.52) 16%, rgba(0,0,0,0.24) 34%, rgba(0,0,0,0.12) 54%, rgba(0,0,0,0.2) 78%, rgba(0,0,0,0.42) 100%)",
+          },
         }}
       />
 
@@ -56,6 +63,7 @@ export default function MemberCinematicBackground() {
         sx={{
           position: "absolute",
           inset: 0,
+          pointerEvents: "none",
           background: `
             radial-gradient(ellipse 38% 32% at 72% 30%, rgba(255,200,110,0.2), transparent 55%),
             radial-gradient(ellipse 75% 38% at 50% 88%, rgba(100,160,255,0.18), transparent 58%)
@@ -67,6 +75,7 @@ export default function MemberCinematicBackground() {
         sx={{
           position: "absolute",
           inset: 0,
+          pointerEvents: "none",
           background:
             "radial-gradient(ellipse 115% 85% at 50% 50%, transparent 42%, rgba(0,0,0,0.36) 100%)",
         }}
@@ -76,6 +85,7 @@ export default function MemberCinematicBackground() {
         sx={{
           position: "absolute",
           inset: 0,
+          pointerEvents: "none",
           backgroundColor: "rgba(0,0,0,0.06)",
         }}
       />

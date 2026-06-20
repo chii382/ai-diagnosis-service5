@@ -61,6 +61,15 @@ const theme = createTheme({
         root: jpTextSx,
       },
     },
+    MuiListItemText: {
+      styleOverrides: {
+        root: {
+          minWidth: 0,
+        },
+        primary: jpTextSx,
+        secondary: jpTextSx,
+      },
+    },
     MuiButton: {
       styleOverrides: {
         root: {
