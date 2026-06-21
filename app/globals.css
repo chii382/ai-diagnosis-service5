@@ -481,193 +481,84 @@ body {
 }
 
 .diagnosis-orbit-outer {
-  animation: diagnosis-orbit-spin 6s linear infinite;
+  animation: diagnosis-orbit-spin 4.5s linear infinite;
 }
 
 .diagnosis-dot-pulse {
-  animation: diagnosis-dot-bounce 1.1s ease-in-out infinite;
+  animation: diagnosis-dot-bounce 0.95s ease-in-out infinite;
 }
 
 .diagnosis-start-cta {
   animation: diagnosis-cta-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
-/* 診断待機：背景画像のゆっくりズーム＋パン */
+/* 診断待機：背景画像のゆっくりズーム（GPU レイヤー） */
 .diagnosis-analyzing-bg-kenburns {
-  animation: diagnosis-analyzing-kenburns 14s ease-in-out infinite alternate;
+  animation: diagnosis-analyzing-kenburns 12s ease-in-out infinite;
   transform-origin: center center;
+  will-change: transform;
+  backface-visibility: hidden;
 }
 
 @keyframes diagnosis-analyzing-kenburns {
-  from {
-    transform: scale(1.08) translate3d(-1.2%, 0.8%, 0);
-  }
-  to {
-    transform: scale(1.18) translate3d(1.2%, -1.2%, 0);
-  }
-}
-
-.diagnosis-analyzing-bg-float {
-  animation: diagnosis-analyzing-drift 10s ease-in-out infinite alternate;
-}
-
-@keyframes diagnosis-analyzing-drift {
-  from {
-    transform: translate3d(-1%, 0.8%, 0);
-  }
-  to {
-    transform: translate3d(1.2%, -1%, 0);
-  }
-}
-
-/* 診断待機：CSS 星空（高密度）のパララックス＋きらめき */
-.diagnosis-analyzing-stars-drift-1 {
-  animation: diagnosis-analyzing-stars-drift-a 11s ease-in-out infinite alternate;
-}
-
-.diagnosis-analyzing-stars-drift-2 {
-  animation: diagnosis-analyzing-stars-drift-b 8s ease-in-out infinite alternate;
-}
-
-.diagnosis-analyzing-stars-drift-3 {
-  animation: diagnosis-analyzing-stars-drift-c 13s ease-in-out infinite alternate;
-}
-
-.diagnosis-analyzing-stars-drift-4 {
-  animation: diagnosis-analyzing-stars-drift-d 9s ease-in-out infinite alternate;
-}
-
-@keyframes diagnosis-analyzing-stars-drift-a {
-  from {
-    transform: translate3d(-2.5%, 1.8%, 0);
-  }
-  to {
-    transform: translate3d(3%, -2.5%, 0);
-  }
-}
-
-@keyframes diagnosis-analyzing-stars-drift-b {
-  from {
-    transform: translate3d(2.2%, -1.5%, 0);
-  }
-  to {
-    transform: translate3d(-2.8%, 2%, 0);
-  }
-}
-
-@keyframes diagnosis-analyzing-stars-drift-c {
-  from {
-    transform: translate3d(-1.8%, -1.2%, 0);
-  }
-  to {
-    transform: translate3d(2.4%, 1.6%, 0);
-  }
-}
-
-@keyframes diagnosis-analyzing-stars-drift-d {
-  from {
-    transform: translate3d(2%, 1.4%, 0);
-  }
-  to {
-    transform: translate3d(-2.6%, -1.8%, 0);
-  }
-}
-
-@keyframes diagnosis-analyzing-twinkle {
   0%,
   100% {
-    opacity: 0.62;
+    transform: scale(1.08) translate3d(-1%, 0.5%, 0);
   }
-  40% {
-    opacity: 1;
-  }
-  70% {
-    opacity: 0.78;
-  }
-}
-
-.diagnosis-analyzing-stars-1,
-.diagnosis-analyzing-stars-2,
-.diagnosis-analyzing-stars-3,
-.diagnosis-analyzing-stars-4 {
-  filter: brightness(1.2);
-}
-
-.diagnosis-analyzing-stars-1 {
-  background-size: 130px 130px !important;
-  animation: diagnosis-analyzing-twinkle 2.4s ease-in-out infinite,
-    diagnosis-stars-bg-pan 18s linear infinite;
-}
-
-.diagnosis-analyzing-stars-2 {
-  background-size: 160px 160px !important;
-  animation: diagnosis-analyzing-twinkle 3.1s ease-in-out infinite reverse,
-    diagnosis-stars-bg-pan-alt 14s linear infinite reverse;
-}
-
-.diagnosis-analyzing-stars-3 {
-  background-size: 240px 240px !important;
-  animation: diagnosis-analyzing-twinkle 2.8s ease-in-out infinite,
-    diagnosis-stars-bg-pan-base 20s linear infinite;
-}
-
-.diagnosis-analyzing-stars-4 {
-  background-size: 130px 130px !important;
-  animation: diagnosis-analyzing-twinkle 3.4s ease-in-out infinite reverse,
-    diagnosis-stars-bg-pan-extra 16s linear infinite;
-}
-
-@keyframes diagnosis-stars-bg-pan {
-  from {
-    background-position: 0 0;
-  }
-  to {
-    background-position: 130px 130px;
-  }
-}
-
-@keyframes diagnosis-stars-bg-pan-alt {
-  from {
-    background-position: 40px 30px;
-  }
-  to {
-    background-position: 200px 190px;
-  }
-}
-
-@keyframes diagnosis-stars-bg-pan-base {
-  from {
-    background-position: 0 0;
-  }
-  to {
-    background-position: 240px 240px;
-  }
-}
-
-@keyframes diagnosis-stars-bg-pan-extra {
-  from {
-    background-position: 65px 45px;
-  }
-  to {
-    background-position: 195px 175px;
+  50% {
+    transform: scale(1.16) translate3d(1%, -0.6%, 0);
   }
 }
 
 .diagnosis-analyzing-glow {
-  animation: diagnosis-analyzing-glow 2.2s ease-in-out infinite alternate;
+  animation: diagnosis-analyzing-glow-pulse 2.4s ease-in-out infinite;
+  will-change: opacity;
 }
 
-@keyframes diagnosis-analyzing-glow {
-  from {
-    opacity: 0.72;
+@keyframes diagnosis-analyzing-glow-pulse {
+  0%,
+  100% {
+    opacity: 0.86;
   }
-  to {
+  50% {
     opacity: 1;
   }
 }
 
+.diagnosis-analyzing-content-float {
+  animation: diagnosis-analyzing-content-float 3.8s ease-in-out infinite;
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+@keyframes diagnosis-analyzing-content-float {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -5px, 0);
+  }
+}
+
+body.diagnosis-analyzing-active,
+body.diagnosis-analyzing-active * {
+  cursor: wait !important;
+}
+
+.diagnosis-orbit-outer,
 .diagnosis-orbit-inner {
-  animation: diagnosis-orbit-spin-reverse 3.5s linear infinite;
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+.diagnosis-core-pulse,
+.diagnosis-dot-pulse {
+  will-change: transform, opacity;
+}
+
+.diagnosis-orbit-inner {
+  animation: diagnosis-orbit-spin-reverse 2.6s linear infinite;
 }
 
 @keyframes diagnosis-orbit-spin-reverse {
@@ -680,7 +571,7 @@ body {
 }
 
 .diagnosis-core-pulse {
-  animation: diagnosis-core-pulse 1.6s ease-in-out infinite;
+  animation: diagnosis-core-pulse 1.2s ease-in-out infinite;
 }
 
 @keyframes diagnosis-core-pulse {
@@ -697,47 +588,12 @@ body {
 
 @media (max-width: 899.95px) {
   @keyframes diagnosis-analyzing-kenburns {
-    from {
-      transform: scale(1.06) translate3d(-0.8%, 0.5%, 0);
+    0%,
+    100% {
+      transform: scale(1.06) translate3d(-0.6%, 0.35%, 0);
     }
-    to {
-      transform: scale(1.12) translate3d(0.8%, -0.8%, 0);
-    }
-  }
-
-  @keyframes diagnosis-analyzing-stars-drift-a {
-    from {
-      transform: translate3d(-1.8%, 1.2%, 0);
-    }
-    to {
-      transform: translate3d(2.2%, -1.6%, 0);
-    }
-  }
-
-  @keyframes diagnosis-analyzing-stars-drift-b {
-    from {
-      transform: translate3d(1.5%, -1%, 0);
-    }
-    to {
-      transform: translate3d(-2%, 1.4%, 0);
-    }
-  }
-
-  @keyframes diagnosis-analyzing-stars-drift-c {
-    from {
-      transform: translate3d(-1.2%, -0.8%, 0);
-    }
-    to {
-      transform: translate3d(1.6%, 1%, 0);
-    }
-  }
-
-  @keyframes diagnosis-analyzing-stars-drift-d {
-    from {
-      transform: translate3d(1.4%, 0.9%, 0);
-    }
-    to {
-      transform: translate3d(-1.8%, -1.2%, 0);
+    50% {
+      transform: scale(1.12) translate3d(0.6%, -0.4%, 0);
     }
   }
 }
@@ -954,16 +810,8 @@ body {
   .diagnosis-dot-pulse,
   .diagnosis-start-cta,
   .diagnosis-analyzing-bg-kenburns,
-  .diagnosis-analyzing-bg-float,
-  .diagnosis-analyzing-stars-drift-1,
-  .diagnosis-analyzing-stars-drift-2,
-  .diagnosis-analyzing-stars-drift-3,
-  .diagnosis-analyzing-stars-drift-4,
-  .diagnosis-analyzing-stars-1,
-  .diagnosis-analyzing-stars-2,
-  .diagnosis-analyzing-stars-3,
-  .diagnosis-analyzing-stars-4,
-  .diagnosis-analyzing-glow {
+  .diagnosis-analyzing-glow,
+  .diagnosis-analyzing-content-float {
     animation: none;
   }
   .premium-locked-charts,
@@ -989,4 +837,20 @@ body {
     animation: none;
     display: none;
   }
+}
+
+/* ── 画面遷移：待機カーソル ── */
+body.navigation-pending {
+  cursor: wait;
+}
+
+body.navigation-pending a,
+body.navigation-pending button {
+  pointer-events: none;
+}
+
+/* ── API処理中：待機カーソル ── */
+body.processing-pending,
+body.processing-pending * {
+  cursor: wait !important;
 }

@@ -1,6 +1,10 @@
 import { getDiagnosesCollection } from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
-import { serializeDiagnosis, serializeDiagnosisListItem } from "@/lib/diagnosis/serialize";
+import {
+  diagnosisRecordFromMongo,
+  serializeDiagnosis,
+  serializeDiagnosisListItem,
+} from "@/lib/diagnosis/serialize";
 
 export async function fetchDiagnosisForUser(id: string, userId: string) {
   if (!ObjectId.isValid(id)) return null;
@@ -13,15 +17,19 @@ export async function fetchDiagnosisForUser(id: string, userId: string) {
 
   if (!doc) return null;
 
-  return serializeDiagnosis({
-    _id: doc._id,
-    userId: doc.userId as ObjectId,
-    answers: doc.answers,
-    result: doc.result,
-    careerRoadmap: doc.careerRoadmap,
-    createdAt: doc.createdAt as Date,
-    updatedAt: doc.updatedAt as Date,
-  });
+  return serializeDiagnosis(
+    diagnosisRecordFromMongo({
+      _id: doc._id,
+      userId: doc.userId as ObjectId,
+      answers: doc.answers,
+      result: doc.result,
+      resultBrief: doc.resultBrief,
+      careerRoadmap: doc.careerRoadmap,
+      careerRoadmapBrief: doc.careerRoadmapBrief,
+      createdAt: doc.createdAt as Date,
+      updatedAt: doc.updatedAt as Date,
+    }),
+  );
 }
 
 export async function fetchDiagnosisHistoryForUser(userId: string) {

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import ThemeRegistry from "@/app/providers/ThemeRegistry";
 import AuthSessionProvider from "@/app/providers/AuthSessionProvider";
+import NavigationProgress from "@/app/providers/NavigationProgress";
 import "@/app/globals.css";
 
 export const metadata: Metadata = {
@@ -23,7 +24,10 @@ export default function RootLayout({
     <html lang="ja" data-scroll-behavior="smooth" suppressHydrationWarning>
       <body suppressHydrationWarning>
         <ThemeRegistry>
-          <AuthSessionProvider>{children}</AuthSessionProvider>
+          <AuthSessionProvider>
+            <NavigationProgress />
+            {children}
+          </AuthSessionProvider>
         </ThemeRegistry>
       </body>
     </html>

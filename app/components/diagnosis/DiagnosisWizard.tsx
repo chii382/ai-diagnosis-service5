@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePendingRouter } from "@/app/hooks/usePendingRouter";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -39,7 +39,7 @@ const questionCardSx = (expanded: boolean, answered: boolean) =>
   }) as const;
 
 export default function DiagnosisWizard() {
-  const router = useRouter();
+  const router = usePendingRouter();
   const [expandedIndex, setExpandedIndex] = useState(0);
   const [answers, setAnswers] = useState<DiagnosisAnswers>(createEmptyAnswers());
   const [submitting, setSubmitting] = useState(false);

@@ -10,6 +10,7 @@ import MemberCinematicBackground from "@/app/components/member/MemberCinematicBa
 import { eyebrowSx } from "@/app/components/member/memberStyles";
 import { canEditDiagnosisResult, getDefaultUserPlan } from "@/lib/plan";
 import { fetchDiagnosisForUser } from "@/lib/diagnosis/server";
+import { resolveDiagnosisReturnTo } from "@/lib/diagnosis/navigation";
 
 export const metadata = {
   title: "診断結果編集 | AIキャリア診断",
@@ -19,15 +20,17 @@ export const dynamic = "force-dynamic";
 
 type PageProps = {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ returnTo?: string }>;
 };
 
-export default async function DiagnosisEditPage({ params }: PageProps) {
+export default async function DiagnosisEditPage({ params, searchParams }: PageProps) {
   const session = await auth();
   if (!session?.user?.id) {
     redirect("/auth/signin");
   }
 
   const { id } = await params;
+  const { returnTo: returnToParam } = await searchParams;
   const diagnosis = await fetchDiagnosisForUser(id, session.user.id);
   if (!diagnosis) {
     redirect("/diagnosis/history");
@@ -37,6 +40,8 @@ export default async function DiagnosisEditPage({ params }: PageProps) {
   if (!canEditDiagnosisResult(plan)) {
     redirect(`/diagnosis/result?id=${id}`);
   }
+
+  const returnTo = resolveDiagnosisReturnTo(id, returnToParam);
 
   return (
     <Box sx={{ position: "relative", minHeight: "100svh", overflowX: "hidden" }}>
@@ -55,7 +60,7 @@ export default async function DiagnosisEditPage({ params }: PageProps) {
                 診断結果の編集
               </Typography>
             </Stack>
-            <DiagnosisEditForm diagnosis={diagnosis} />
+            <DiagnosisEditForm diagnosis={diagnosis} returnTo={returnTo} />
           </Stack>
         </Container>
       </Box>

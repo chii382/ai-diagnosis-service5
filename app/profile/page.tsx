@@ -9,16 +9,26 @@ import Typography from "@mui/material/Typography";
 import MemberNav from "@/app/components/member/MemberNav";
 import MemberVideoBackground from "@/app/components/member/MemberVideoBackground";
 import ProfileForm, { ProfileData } from "@/app/profile/ProfileForm";
+import { resolveInternalReturnTo } from "@/lib/navigation";
 
 export const metadata = {
   title: "プロフィール | AIキャリア診断",
 };
 
-export default async function ProfilePage() {
+export const dynamic = "force-dynamic";
+
+type PageProps = {
+  searchParams: Promise<{ returnTo?: string }>;
+};
+
+export default async function ProfilePage({ searchParams }: PageProps) {
   const session = await auth();
   if (!session?.user?.id) {
     redirect("/auth/signin");
   }
+
+  const { returnTo: returnToParam } = await searchParams;
+  const returnTo = resolveInternalReturnTo("/dashboard", returnToParam);
 
   const users = await getUsersCollection();
   const user = await users.findOne({ _id: new ObjectId(session.user.id) });
@@ -78,7 +88,7 @@ export default async function ProfilePage() {
             </Typography>
           </Stack>
 
-          <ProfileForm initialProfile={initialProfile} />
+          <ProfileForm initialProfile={initialProfile} returnTo={returnTo} />
         </Stack>
       </Container>
       </Box>

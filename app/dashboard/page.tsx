@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { buildProfileHref } from "@/lib/navigation";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import Box from "@mui/material/Box";
@@ -19,10 +20,13 @@ import MemberNav from "@/app/components/member/MemberNav";
 import MemberCinematicBackground from "@/app/components/member/MemberCinematicBackground";
 import { getDefaultUserPlan, getPlanLabel } from "@/lib/plan";
 import { jpTextSx } from "@/lib/typography";
+import { fetchUserProfileForUser } from "@/lib/user/server";
 
 export const metadata = {
   title: "ダッシュボード | AIキャリア診断",
 };
+
+export const dynamic = "force-dynamic";
 
 const glassCardSx = {
   height: "100%",
@@ -59,11 +63,18 @@ const linkButtonSx = {
 
 export default async function DashboardPage() {
   const session = await auth();
-  if (!session?.user) {
+  if (!session?.user?.id) {
     redirect("/auth/signin");
   }
 
-  const { user } = session;
+  const dbUser = await fetchUserProfileForUser(session.user.id);
+  if (!dbUser) {
+    redirect("/auth/signin");
+  }
+
+  const displayName = dbUser.name || session.user.name || "会員";
+  const displayImage = dbUser.image || session.user.image || null;
+  const displayEmail = dbUser.email || session.user.email || "";
   const plan = getDefaultUserPlan();
   const planLabel = getPlanLabel(plan);
 
@@ -73,8 +84,8 @@ export default async function DashboardPage() {
 
       <Box className="dashboard-content-float" sx={{ position: "relative", zIndex: 1 }}>
         <MemberNav
-          userName={user.name}
-          userImage={user.image}
+          userName={displayName}
+          userImage={displayImage}
           transparent
         />
 
@@ -101,12 +112,7 @@ export default async function DashboardPage() {
                   textShadow: "0 0 40px rgba(56,123,255,0.25)",
                 }}
               >
-                <Box component="span" sx={{ display: "block" }}>
-                  ようこそ、
-                </Box>
-                <Box component="span" sx={{ display: "inline-block", whiteSpace: "nowrap" }}>
-                  {user.name ?? "会員"} さん
-                </Box>
+                ようこそ、{displayName} さん
               </Typography>
               <Typography
                 sx={{
@@ -165,8 +171,8 @@ export default async function DashboardPage() {
 
                   <Stack direction="row" spacing={2} alignItems="flex-start">
                     <Avatar
-                      src={user.image ?? undefined}
-                      alt={user.name ?? "ユーザー"}
+                      src={displayImage ?? undefined}
+                      alt={displayName}
                       sx={{
                         width: 72,
                         height: 72,
@@ -185,7 +191,7 @@ export default async function DashboardPage() {
                         sx={{ mb: 0.75, rowGap: 1 }}
                       >
                         <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.3 }}>
-                          {user.name ?? "未設定"}
+                          {displayName || "未設定"}
                         </Typography>
                         <Box
                           sx={{
@@ -227,14 +233,14 @@ export default async function DashboardPage() {
                         </Box>
                       </Stack>
                       <Typography variant="body2" sx={{ color: "rgba(255,255,255,0.65)" }}>
-                        {user.email}
+                        {displayEmail}
                       </Typography>
                     </Box>
                   </Stack>
 
                   <Button
                     component={Link}
-                    href="/profile"
+                    href={buildProfileHref("/dashboard")}
                     variant="outlined"
                     fullWidth
                     startIcon={<PersonOutlineIcon />}

@@ -1,6 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import { signIn } from "next-auth/react";
+import { startProcessingPending, stopProcessingPending } from "@/lib/processing-pending";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
@@ -24,6 +26,19 @@ export default function SignInForm({
   authConfigured = false,
   callbackUrl = "/dashboard",
 }: SignInFormProps) {
+  const [signingIn, setSigningIn] = useState(false);
+
+  async function handleGoogleSignIn() {
+    if (signingIn || !authConfigured) return;
+    setSigningIn(true);
+    startProcessingPending();
+    try {
+      await signIn("google", { callbackUrl });
+    } finally {
+      setSigningIn(false);
+      stopProcessingPending();
+    }
+  }
 
   return (
     <Box
@@ -103,12 +118,12 @@ export default function SignInForm({
                 variant="contained"
                 size="large"
                 fullWidth
-                disabled={!authConfigured}
+                disabled={!authConfigured || signingIn}
                 startIcon={<GoogleIcon />}
-                onClick={() => signIn("google", { callbackUrl })}
+                onClick={() => void handleGoogleSignIn()}
                 sx={{ py: 1.4, maxWidth: 360 }}
               >
-                Googleでログイン
+                {signingIn ? "ログイン中..." : "Googleでログイン"}
               </Button>
             </Stack>
           </CardContent>

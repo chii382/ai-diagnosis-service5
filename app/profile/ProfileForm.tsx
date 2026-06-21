@@ -1,8 +1,9 @@
 "use client";
 
 import { ChangeEvent, FormEvent, useMemo, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePendingRouter } from "@/app/hooks/usePendingRouter";
 import { useSession } from "next-auth/react";
+import { startProcessingPending, stopProcessingPending } from "@/lib/processing-pending";
 import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -45,6 +46,7 @@ export interface ProfileData {
 
 interface ProfileFormProps {
   initialProfile: ProfileData;
+  returnTo: string;
 }
 
 function formatDate(value: string | null) {
@@ -103,8 +105,8 @@ const profileFieldSx = {
   },
 } as const;
 
-export default function ProfileForm({ initialProfile }: ProfileFormProps) {
-  const router = useRouter();
+export default function ProfileForm({ initialProfile, returnTo }: ProfileFormProps) {
+  const router = usePendingRouter();
   const { update: updateSession } = useSession();
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const [profile, setProfile] = useState(initialProfile);
@@ -115,7 +117,8 @@ export default function ProfileForm({ initialProfile }: ProfileFormProps) {
   const [bio, setBio] = useState(initialProfile.bio);
   const [saving, setSaving] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
-  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [discardConfirmOpen, setDiscardConfirmOpen] = useState(false);
+  const [saveConfirmOpen, setSaveConfirmOpen] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(
     null,
   );
@@ -130,21 +133,85 @@ export default function ProfileForm({ initialProfile }: ProfileFormProps) {
     [name, gender, ageRange, occupation, bio, profile],
   );
 
+  function navigateBack() {
+    router.replace(returnTo);
+    router.refresh();
+  }
+
   function handleCancelClick() {
+    if (saving) return;
     if (isDirty) {
-      setConfirmOpen(true);
+      setDiscardConfirmOpen(true);
       return;
     }
-    router.push("/dashboard");
+    navigateBack();
   }
 
-  function handleConfirmDiscard() {
-    setConfirmOpen(false);
-    router.push("/dashboard");
+  function handleDiscardStay() {
+    setDiscardConfirmOpen(false);
   }
 
-  function handleConfirmStay() {
-    setConfirmOpen(false);
+  function handleDiscardConfirm() {
+    setDiscardConfirmOpen(false);
+    navigateBack();
+  }
+
+  function openSaveConfirm() {
+    if (saving || !isDirty || !name.trim()) return;
+    setSaveConfirmOpen(true);
+  }
+
+  function handleSaveClick(event: FormEvent) {
+    event.preventDefault();
+    openSaveConfirm();
+  }
+
+  function handleSaveCancel() {
+    setSaveConfirmOpen(false);
+  }
+
+  async function performSave() {
+    setSaveConfirmOpen(false);
+    setSaving(true);
+    setMessage(null);
+    startProcessingPending();
+
+    try {
+      const response = await fetch("/api/user/profile", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name,
+          gender: gender || null,
+          ageRange: ageRange || null,
+          occupation: occupation || null,
+          bio,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error ?? "保存に失敗しました");
+      }
+
+      setProfile(data);
+      setName(data.name);
+      setGender(data.gender ?? "");
+      setAgeRange(data.ageRange ?? "");
+      setOccupation(data.occupation ?? "");
+      setBio(data.bio ?? "");
+      await updateSession({ name: data.name });
+      navigateBack();
+    } catch (error) {
+      setMessage({
+        type: "error",
+        text: error instanceof Error ? error.message : "保存に失敗しました",
+      });
+    } finally {
+      setSaving(false);
+      stopProcessingPending();
+    }
   }
 
   async function handleAvatarChange(event: ChangeEvent<HTMLInputElement>) {
@@ -154,6 +221,7 @@ export default function ProfileForm({ initialProfile }: ProfileFormProps) {
 
     setUploadingAvatar(true);
     setMessage(null);
+    startProcessingPending();
 
     try {
       const formData = new FormData();
@@ -192,47 +260,7 @@ export default function ProfileForm({ initialProfile }: ProfileFormProps) {
       });
     } finally {
       setUploadingAvatar(false);
-    }
-  }
-
-  async function handleSubmit(event: FormEvent) {
-    event.preventDefault();
-    setSaving(true);
-    setMessage(null);
-
-    try {
-      const response = await fetch("/api/user/profile", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name,
-          gender: gender || null,
-          ageRange: ageRange || null,
-          occupation: occupation || null,
-          bio,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error ?? "保存に失敗しました");
-      }
-
-      setProfile(data);
-      setName(data.name);
-      setGender(data.gender ?? "");
-      setAgeRange(data.ageRange ?? "");
-      setOccupation(data.occupation ?? "");
-      setBio(data.bio ?? "");
-      router.push("/dashboard");
-    } catch (error) {
-      setMessage({
-        type: "error",
-        text: error instanceof Error ? error.message : "保存に失敗しました",
-      });
-    } finally {
-      setSaving(false);
+      stopProcessingPending();
     }
   }
 
@@ -347,7 +375,7 @@ export default function ProfileForm({ initialProfile }: ProfileFormProps) {
 
       <Card
         component="form"
-        onSubmit={handleSubmit}
+        onSubmit={handleSaveClick}
         sx={profileCardSx}
       >
         <CardContent sx={{ p: { xs: 3, sm: 4 } }}>
@@ -453,7 +481,12 @@ export default function ProfileForm({ initialProfile }: ProfileFormProps) {
             />
 
             <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
-              <Button type="submit" variant="contained" disabled={saving || !name.trim()}>
+              <Button
+                type="button"
+                variant="contained"
+                disabled={!isDirty || saving || !name.trim()}
+                onClick={openSaveConfirm}
+              >
                 {saving ? "保存中..." : "変更を保存"}
               </Button>
               <Button
@@ -477,17 +510,34 @@ export default function ProfileForm({ initialProfile }: ProfileFormProps) {
         </CardContent>
       </Card>
 
-      <Dialog open={confirmOpen} onClose={handleConfirmStay} maxWidth="xs" fullWidth>
+      <Dialog open={discardConfirmOpen} onClose={handleDiscardStay} maxWidth="xs" fullWidth>
         <DialogTitle sx={{ fontWeight: 700 }}>編集内容の破棄</DialogTitle>
         <DialogContent>
           <DialogContentText sx={{ color: "text.secondary" }}>
-            編集されたデータは破棄されます。よろしいですか？
+            編集内容が破棄されます。よろしいですか？
           </DialogContentText>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button onClick={handleConfirmStay}>キャンセル</Button>
-          <Button onClick={handleConfirmDiscard} variant="contained" color="error">
+          <Button onClick={handleDiscardStay}>キャンセル</Button>
+          <Button onClick={handleDiscardConfirm} variant="contained" color="error">
             OK
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={saveConfirmOpen} onClose={handleSaveCancel} maxWidth="xs" fullWidth>
+        <DialogTitle sx={{ fontWeight: 700 }}>変更の保存</DialogTitle>
+        <DialogContent>
+          <DialogContentText sx={{ color: "text.secondary" }}>
+            変更を保存します。よろしいですか？
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={handleSaveCancel} disabled={saving}>
+            キャンセル
+          </Button>
+          <Button onClick={performSave} variant="contained" disabled={saving}>
+            {saving ? "保存中..." : "OK"}
           </Button>
         </DialogActions>
       </Dialog>

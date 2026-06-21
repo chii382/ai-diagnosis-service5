@@ -13,9 +13,9 @@ export function canViewPremiumContent(plan: UserPlan): boolean {
   return canViewPremiumCharts(plan);
 }
 
-/** 診断結果の手動編集が可能か */
-export function canEditDiagnosisResult(plan: UserPlan): boolean {
-  return canViewPremiumContent(plan);
+/** 診断結果の手動編集が可能か（全プランで利用可） */
+export function canEditDiagnosisResult(_plan: UserPlan): boolean {
+  return true;
 }
 
 export function getDefaultUserPlan(): UserPlan {

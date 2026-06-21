@@ -9,10 +9,16 @@ import type {
 } from "@/lib/diagnosis/types";
 import { canViewPremiumContent, type UserPlan } from "@/lib/plan";
 
-function truncate(text: string, maxLength: number): string {
-  const trimmed = text.trim();
-  if (trimmed.length <= maxLength) return trimmed;
-  return `${trimmed.slice(0, maxLength - 1)}…`;
+function hasTruncationEllipsis(text: string): boolean {
+  return text.trimEnd().endsWith("…");
+}
+
+/** 末尾の省略記号を除き、句点で終わる完全な文に整える */
+export function ensureCompleteSentence(text: string): string {
+  const cleaned = text.trim().replace(/…+$/u, "").trimEnd();
+  if (!cleaned) return cleaned;
+  if (/[。！？]$/.test(cleaned)) return cleaned;
+  return `${cleaned}。`;
 }
 
 function normalizeLegacyBriefPhase(
@@ -40,22 +46,19 @@ function derivePhaseBrief(phase: CareerRoadmapPhase): CareerRoadmapPhaseBrief {
   const secondaryGoal = phase.goals[1];
   const primaryAction = phase.actions[0];
 
-  const overview = truncate(
-    [
-      `この期間は、${primaryGoal.replace(/。$/, "")}ことを重点テーマとして進めます。`,
-      secondaryGoal
-        ? `あわせて${secondaryGoal.replace(/。$/, "")}方向への成長も視野に入れ、次のステップへつなげていきます。`
-        : primaryAction
-          ? `特に${primaryAction.replace(/。$/, "")}などが、この時期の核となる取り組みです。`
-          : "方向性を固めながら、次のフェーズへの準備を進めます。",
-    ].join(""),
-    120,
-  );
+  const overview = [
+    `この期間は、${primaryGoal.replace(/。$/, "")}ことを重点テーマとして進めます。`,
+    secondaryGoal
+      ? `あわせて${secondaryGoal.replace(/。$/, "")}方向への成長も視野に入れ、次のステップへつなげていきます。`
+      : primaryAction
+        ? `特に${primaryAction.replace(/。$/, "")}などが、この時期の核となる取り組みです。`
+        : "方向性を固めながら、次のフェーズへの準備を進めます。",
+  ].join("");
 
-  const highlights = [
-    truncate(primaryGoal, 40),
-    truncate(secondaryGoal ?? primaryAction ?? primaryGoal, 40),
-  ].filter((item, index, arr) => item && arr.indexOf(item) === index);
+  const highlights = [primaryGoal, secondaryGoal ?? primaryAction ?? primaryGoal]
+    .map((item) => item?.trim())
+    .filter((item): item is string => Boolean(item))
+    .filter((item, index, arr) => arr.indexOf(item) === index);
 
   return {
     period: phase.period,
@@ -66,10 +69,10 @@ function derivePhaseBrief(phase: CareerRoadmapPhase): CareerRoadmapPhaseBrief {
 
 export function deriveResultBrief(result: DiagnosisResult): DiagnosisResultBrief {
   return {
-    summary: truncate(result.summary, 100),
+    summary: ensureCompleteSentence(result.summary),
     strengths: result.strengths.slice(0, 1),
     recommendedDirections: result.recommendedDirections.slice(0, 1),
-    advice: truncate(result.advice, 80),
+    advice: ensureCompleteSentence(result.advice),
   };
 }
 
@@ -85,12 +88,26 @@ export function resolveResultBrief(diagnosis: DiagnosisDocument): DiagnosisResul
   return diagnosis.resultBrief ?? deriveResultBrief(diagnosis.result);
 }
 
+function resolveBriefPhase(
+  phase: CareerRoadmapPhaseBrief & { goal?: string },
+  fullPhase: CareerRoadmapPhase,
+): CareerRoadmapPhaseBrief {
+  const normalized = normalizeLegacyBriefPhase(phase);
+  if (hasTruncationEllipsis(normalized.overview)) {
+    return derivePhaseBrief(fullPhase);
+  }
+  return {
+    ...normalized,
+    overview: ensureCompleteSentence(normalized.overview),
+  };
+}
+
 export function resolveRoadmapBrief(diagnosis: DiagnosisDocument): CareerRoadmapBrief {
   const brief = diagnosis.careerRoadmapBrief ?? deriveRoadmapBrief(diagnosis.careerRoadmap);
   return {
-    shortTerm: normalizeLegacyBriefPhase(brief.shortTerm),
-    midTerm: normalizeLegacyBriefPhase(brief.midTerm),
-    longTerm: normalizeLegacyBriefPhase(brief.longTerm),
+    shortTerm: resolveBriefPhase(brief.shortTerm, diagnosis.careerRoadmap.shortTerm),
+    midTerm: resolveBriefPhase(brief.midTerm, diagnosis.careerRoadmap.midTerm),
+    longTerm: resolveBriefPhase(brief.longTerm, diagnosis.careerRoadmap.longTerm),
   };
 }
 

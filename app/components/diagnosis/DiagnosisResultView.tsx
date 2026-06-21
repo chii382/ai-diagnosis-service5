@@ -25,6 +25,7 @@ import {
   getResultForPlan,
   getRoadmapForPlan,
 } from "@/lib/diagnosis/plan-content";
+import { buildDiagnosisEditHref, resolveDiagnosisReturnTo } from "@/lib/diagnosis/navigation";
 import type {
   CareerRoadmap,
   CareerRoadmapBrief,
@@ -44,6 +45,7 @@ const outlinedActionButtonSx = {
 interface DiagnosisResultViewProps {
   diagnosis: DiagnosisDocument;
   showActions?: boolean;
+  returnTo?: string;
 }
 
 function RoadmapCard({
@@ -84,7 +86,9 @@ function RoadmapCard({
 export default function DiagnosisResultView({
   diagnosis,
   showActions = true,
+  returnTo,
 }: DiagnosisResultViewProps) {
+  const resultReturnTo = resolveDiagnosisReturnTo(diagnosis._id, returnTo);
   const created = new Date(diagnosis.createdAt).toLocaleString("ja-JP");
   const plan = getDefaultUserPlan();
   const isPremium = canViewPremiumContent(plan);
@@ -259,9 +263,18 @@ export default function DiagnosisResultView({
         >
           <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} useFlexGap flexWrap="wrap">
             <DiagnosisEditActionButton
-              editHref={`/diagnosis/${diagnosis._id}/edit`}
+              editHref={buildDiagnosisEditHref(diagnosis._id, resultReturnTo)}
               unlocked={canEdit}
             />
+            <Button
+              component={Link}
+              href="/diagnosis/history"
+              variant="outlined"
+              startIcon={<HistoryIcon />}
+              sx={outlinedActionButtonSx}
+            >
+              履歴一覧
+            </Button>
             <Button component={Link} href="/diagnosis" variant="contained">
               もう一度診断する
             </Button>
@@ -274,15 +287,6 @@ export default function DiagnosisResultView({
             flexWrap="wrap"
             sx={{ ml: { lg: "auto" } }}
           >
-            <Button
-              component={Link}
-              href="/diagnosis/history"
-              variant="outlined"
-              startIcon={<HistoryIcon />}
-              sx={outlinedActionButtonSx}
-            >
-              履歴一覧
-            </Button>
             <Button
               component={Link}
               href="/dashboard"

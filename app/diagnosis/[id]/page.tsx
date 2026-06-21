@@ -44,7 +44,7 @@ export default async function DiagnosisDetailPage({ params }: PageProps) {
               診断結果詳細
             </Typography>
           </Stack>
-          <DiagnosisResultView diagnosis={diagnosis} />
+          <DiagnosisResultView diagnosis={diagnosis} returnTo={`/diagnosis/${id}`} />
         </Stack>
       </Container>
     </MemberPageShell>

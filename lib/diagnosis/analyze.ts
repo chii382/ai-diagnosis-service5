@@ -1,6 +1,9 @@
 import Anthropic from "@anthropic-ai/sdk";
 import type { DiagnosisProfileContext } from "@/lib/diagnosis/profile-context";
-import { deriveRoadmapBrief } from "@/lib/diagnosis/plan-content";
+import {
+  deriveRoadmapBrief,
+  ensureCompleteSentence,
+} from "@/lib/diagnosis/plan-content";
 import { buildDiagnosisPrompt } from "@/lib/diagnosis/prompts";
 import type {
   CareerRoadmap,
@@ -103,7 +106,7 @@ function parseBriefPhase(value: unknown, field: string) {
 
   return {
     period,
-    overview: overviewRaw,
+    overview: ensureCompleteSentence(overviewRaw),
     highlights,
   };
 }
@@ -146,14 +149,19 @@ export function parseAnalysisResponse(raw: string): AnalysisOutput {
   const result = parseResult(resultRaw, "result");
 
   const resultBriefRaw = parsed.resultBrief;
-  const resultBrief = resultBriefRaw
+  const resultBriefParsed = resultBriefRaw
     ? parseResult(resultBriefRaw, "resultBrief")
     : {
-        summary: result.summary.slice(0, 100),
+        summary: result.summary,
         strengths: result.strengths.slice(0, 1),
         recommendedDirections: result.recommendedDirections.slice(0, 1),
-        advice: result.advice.slice(0, 80),
+        advice: result.advice,
       };
+  const resultBrief = {
+    ...resultBriefParsed,
+    summary: ensureCompleteSentence(resultBriefParsed.summary),
+    advice: ensureCompleteSentence(resultBriefParsed.advice),
+  };
 
   const roadmapRaw = parsed.careerRoadmap;
   if (!roadmapRaw || typeof roadmapRaw !== "object") {

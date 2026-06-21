@@ -26,6 +26,10 @@ interface CosmicStarCanvasProps {
   twinkleIntensity?: number;
   /** きらめき速度 */
   twinkleSpeed?: number;
+  /** 星の流れる速度（1 = 標準） */
+  driftSpeed?: number;
+  /** 流れ星の出現頻度（1 = 標準、大きいほど多い） */
+  shootingStarFrequency?: number;
 }
 
 /** LP と同様の Canvas 星空（きらめき・流れ星） */
@@ -33,6 +37,8 @@ export default function CosmicStarCanvas({
   density = 1,
   twinkleIntensity = 1,
   twinkleSpeed = 1,
+  driftSpeed = 1,
+  shootingStarFrequency = 1,
 }: CosmicStarCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -53,7 +59,7 @@ export default function CosmicStarCanvas({
     let shooting: Shooting | null = null;
     let raf = 0;
     let last = 0;
-    let nextShoot = 2600;
+    let nextShoot = 2600 / shootingStarFrequency;
 
     const resize = () => {
       w = canvas.clientWidth;
@@ -97,8 +103,8 @@ export default function CosmicStarCanvas({
 
       for (const s of stars) {
         const speed = 0.004 + s.z * 0.013;
-        s.x += speed * dt;
-        s.y -= speed * 0.22 * dt;
+        s.x += speed * dt * driftSpeed;
+        s.y -= speed * 0.22 * dt * driftSpeed;
         if (s.x > w + 2) s.x = -2;
         if (s.y < -2) s.y = h + 2;
 
@@ -131,12 +137,14 @@ export default function CosmicStarCanvas({
         shooting = {
           x: Math.random() * w * 0.6,
           y: Math.random() * h * 0.4,
-          vx: 0.5 + Math.random() * 0.3,
-          vy: 0.16 + Math.random() * 0.12,
+          vx: (0.5 + Math.random() * 0.35) * Math.min(shootingStarFrequency, 2),
+          vy: (0.16 + Math.random() * 0.14) * Math.min(shootingStarFrequency, 2),
           life: 0,
           len: 130,
         };
-        nextShoot = (density > 1 ? 3800 : 5000) + Math.random() * (density > 1 ? 4500 : 6000);
+        nextShoot =
+          ((density > 1 ? 3800 : 5000) + Math.random() * (density > 1 ? 4500 : 6000)) /
+          shootingStarFrequency;
       }
       if (shooting) {
         shooting.life += dt;
@@ -172,7 +180,7 @@ export default function CosmicStarCanvas({
       cancelAnimationFrame(raf);
       window.removeEventListener("resize", resize);
     };
-  }, [density, twinkleIntensity, twinkleSpeed]);
+  }, [density, twinkleIntensity, twinkleSpeed, driftSpeed, shootingStarFrequency]);
 
   return (
     <canvas

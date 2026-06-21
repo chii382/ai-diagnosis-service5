@@ -13,6 +13,7 @@ import Typography from "@mui/material/Typography";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import type { DiagnosisListItem } from "@/lib/diagnosis/types";
+import { startProcessingPending, stopProcessingPending } from "@/lib/processing-pending";
 import { glassCardSx } from "@/app/components/member/memberStyles";
 
 interface DiagnosisHistoryListProps {
@@ -31,6 +32,7 @@ export default function DiagnosisHistoryList({ items }: DiagnosisHistoryListProp
 
     setDeletingId(id);
     setMessage(null);
+    startProcessingPending();
     try {
       const response = await fetch(`/api/diagnosis/${id}`, { method: "DELETE" });
       const raw = await response.text();
@@ -46,6 +48,7 @@ export default function DiagnosisHistoryList({ items }: DiagnosisHistoryListProp
       });
     } finally {
       setDeletingId(null);
+      stopProcessingPending();
     }
   }
 

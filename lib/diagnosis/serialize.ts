@@ -9,7 +9,7 @@ import type {
   DiagnosisResultBrief,
 } from "@/lib/diagnosis/types";
 
-type DiagnosisRecord = {
+export type DiagnosisRecord = {
   _id: ObjectId;
   userId: ObjectId;
   answers: DiagnosisAnswers;
@@ -20,6 +20,21 @@ type DiagnosisRecord = {
   createdAt: Date;
   updatedAt: Date;
 };
+
+/** MongoDB ドキュメントを API / 画面用レコードに変換する */
+export function diagnosisRecordFromMongo(doc: DiagnosisRecord): DiagnosisRecord {
+  return {
+    _id: doc._id,
+    userId: doc.userId,
+    answers: doc.answers,
+    result: doc.result,
+    resultBrief: doc.resultBrief,
+    careerRoadmap: doc.careerRoadmap,
+    careerRoadmapBrief: doc.careerRoadmapBrief,
+    createdAt: doc.createdAt,
+    updatedAt: doc.updatedAt,
+  };
+}
 
 export function serializeDiagnosis(doc: DiagnosisRecord): DiagnosisDocument {
   return {
@@ -45,7 +60,12 @@ export function serializeDiagnosisListItem(doc: DiagnosisRecord): DiagnosisListI
 }
 
 export function validateDiagnosisUpdate(input: unknown):
-  | { ok: true; result: DiagnosisResult; careerRoadmap: CareerRoadmap }
+  | {
+      ok: true;
+      result: DiagnosisResult;
+      careerRoadmap: CareerRoadmap;
+      careerRoadmapBrief?: CareerRoadmapBrief;
+    }
   | { ok: false; error: string } {
   if (!input || typeof input !== "object") {
     return { ok: false, error: "更新データが不正です" };
@@ -102,9 +122,42 @@ export function validateDiagnosisUpdate(input: unknown):
     return { ok: false, error: "キャリアロードマップの各期間を入力してください" };
   }
 
+  const parseBriefPhase = (value: unknown) => {
+    if (!value || typeof value !== "object") return null;
+    const phase = value as Record<string, unknown>;
+    const period = typeof phase.period === "string" ? phase.period.trim() : "";
+    const overview = typeof phase.overview === "string" ? phase.overview.trim() : "";
+    if (!period || !overview) return null;
+    const highlights = Array.isArray(phase.highlights)
+      ? phase.highlights
+          .filter((item): item is string => typeof item === "string")
+          .map((item) => item.trim())
+          .filter(Boolean)
+      : [];
+    return { period, overview, highlights };
+  };
+
+  let careerRoadmapBrief: CareerRoadmapBrief | undefined;
+  const briefRaw = body.careerRoadmapBrief;
+  if (briefRaw && typeof briefRaw === "object") {
+    const briefObj = briefRaw as Record<string, unknown>;
+    const briefShort = parseBriefPhase(briefObj.shortTerm);
+    const briefMid = parseBriefPhase(briefObj.midTerm);
+    const briefLong = parseBriefPhase(briefObj.longTerm);
+    if (!briefShort || !briefMid || !briefLong) {
+      return { ok: false, error: "各期間の方針概要を入力してください" };
+    }
+    careerRoadmapBrief = {
+      shortTerm: briefShort,
+      midTerm: briefMid,
+      longTerm: briefLong,
+    };
+  }
+
   return {
     ok: true,
     result: { summary, strengths, recommendedDirections, advice },
     careerRoadmap: { shortTerm, midTerm, longTerm },
+    careerRoadmapBrief,
   };
 }

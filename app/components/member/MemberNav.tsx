@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { signOut } from "next-auth/react";
 import AppBar from "@mui/material/AppBar";
+import LogoutConfirmDialog from "@/app/components/auth/LogoutConfirmDialog";
+import { useLogoutConfirm } from "@/app/components/auth/useLogoutConfirm";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
@@ -40,8 +41,10 @@ export default function MemberNav({
   transparent = false,
 }: MemberNavProps) {
   const pathname = usePathname();
+  const { open, submitting, requestLogout, cancelLogout, confirmLogout } = useLogoutConfirm("/");
 
   return (
+    <>
     <AppBar
       position="sticky"
       elevation={0}
@@ -102,7 +105,8 @@ export default function MemberNav({
           <Button
             size="small"
             variant="outlined"
-            onClick={() => signOut({ callbackUrl: "/" })}
+            onClick={requestLogout}
+            disabled={submitting}
             sx={{
               borderColor: "rgba(255,255,255,0.2)",
               color: "rgba(255,255,255,0.8)",
@@ -114,5 +118,12 @@ export default function MemberNav({
         </Stack>
       </Toolbar>
     </AppBar>
+    <LogoutConfirmDialog
+      open={open}
+      loading={submitting}
+      onCancel={cancelLogout}
+      onConfirm={confirmLogout}
+    />
+    </>
   );
 }

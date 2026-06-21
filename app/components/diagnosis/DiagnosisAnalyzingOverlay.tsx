@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
+import CosmicStarCanvas from "@/app/components/common/CosmicStarCanvas";
 
 const BACKGROUND_IMAGE = "/images/diagnosis-analyzing-bg.png";
 
@@ -14,9 +15,16 @@ const STATUS_MESSAGES = [
   "あなた専用のロードマップを作成しています…",
 ] as const;
 
-/** 診断中の全画面待機 UI（背景画像 + CSS 星空・軽量） */
+/** 診断中の全画面待機 UI（背景画像 + 軽量アニメーション） */
 export default function DiagnosisAnalyzingOverlay() {
   const [messageIndex, setMessageIndex] = useState(0);
+
+  useEffect(() => {
+    document.body.classList.add("diagnosis-analyzing-active");
+    return () => {
+      document.body.classList.remove("diagnosis-analyzing-active");
+    };
+  }, []);
 
   useEffect(() => {
     const timer = window.setInterval(() => {
@@ -30,6 +38,7 @@ export default function DiagnosisAnalyzingOverlay() {
       role="status"
       aria-live="polite"
       aria-label="AI診断を実行中"
+      aria-busy="true"
       sx={{
         position: "fixed",
         inset: 0,
@@ -39,60 +48,26 @@ export default function DiagnosisAnalyzingOverlay() {
         justifyContent: "center",
         overflow: "hidden",
         backgroundColor: "#000",
+        cursor: "wait",
         animation: "diagnosis-overlay-in 0.35s ease-out",
       }}
     >
       <Box
         aria-hidden
-        className="diagnosis-analyzing-bg-float"
-        sx={{ position: "absolute", inset: "-7%" }}
-      >
-        <Box
-          className="diagnosis-analyzing-bg-kenburns"
-          sx={{
-            position: "absolute",
-            inset: 0,
-            backgroundImage: `url(${BACKGROUND_IMAGE})`,
-            backgroundSize: { xs: "auto 108%", sm: "auto 112%", md: "cover" },
-            backgroundRepeat: "no-repeat",
-            backgroundPosition: {
-              xs: "center 42%",
-              sm: "center center",
-              md: "center center",
-            },
-          }}
-        />
-      </Box>
-
-      <Box
-        aria-hidden
-        sx={{ position: "absolute", inset: "-6%", pointerEvents: "none", overflow: "hidden" }}
-      >
-        <Box className="diagnosis-analyzing-stars-drift-4" sx={{ position: "absolute", inset: 0 }}>
-          <Box
-            className="stars stars-dashboard diagnosis-analyzing-stars-4"
-            sx={{ position: "absolute", inset: 0, opacity: 0.7 }}
-          />
-        </Box>
-        <Box className="diagnosis-analyzing-stars-drift-3" sx={{ position: "absolute", inset: 0 }}>
-          <Box
-            className="stars diagnosis-analyzing-stars-3"
-            sx={{ position: "absolute", inset: 0, opacity: 0.75 }}
-          />
-        </Box>
-        <Box className="diagnosis-analyzing-stars-drift-1" sx={{ position: "absolute", inset: 0 }}>
-          <Box
-            className="stars stars-dashboard diagnosis-analyzing-stars-1"
-            sx={{ position: "absolute", inset: 0, opacity: 1 }}
-          />
-        </Box>
-        <Box className="diagnosis-analyzing-stars-drift-2" sx={{ position: "absolute", inset: 0 }}>
-          <Box
-            className="stars stars-dashboard stars-dashboard-layer-2 diagnosis-analyzing-stars-2"
-            sx={{ position: "absolute", inset: 0, opacity: 0.82 }}
-          />
-        </Box>
-      </Box>
+        className="diagnosis-analyzing-bg-kenburns"
+        sx={{
+          position: "absolute",
+          inset: "-4%",
+          backgroundImage: `url(${BACKGROUND_IMAGE})`,
+          backgroundSize: { xs: "auto 108%", sm: "auto 112%", md: "cover" },
+          backgroundRepeat: "no-repeat",
+          backgroundPosition: {
+            xs: "center 42%",
+            sm: "center center",
+            md: "center center",
+          },
+        }}
+      />
 
       <Box
         aria-hidden
@@ -109,9 +84,23 @@ export default function DiagnosisAnalyzingOverlay() {
         }}
       />
 
+      <Box
+        aria-hidden
+        sx={{ position: "absolute", inset: 0, pointerEvents: "none", zIndex: 0 }}
+      >
+        <CosmicStarCanvas
+          density={1.55}
+          twinkleIntensity={1.35}
+          twinkleSpeed={2.1}
+          driftSpeed={1.35}
+          shootingStarFrequency={1.75}
+        />
+      </Box>
+
       <Stack
         spacing={3}
         alignItems="center"
+        className="diagnosis-analyzing-content-float"
         sx={{
           position: "relative",
           zIndex: 1,
@@ -188,7 +177,6 @@ export default function DiagnosisAnalyzingOverlay() {
               },
               textShadow: "0 0 28px rgba(56,123,255,0.5)",
               minHeight: "1.6em",
-              whiteSpace: "nowrap",
             }}
           >
             {STATUS_MESSAGES[messageIndex]}

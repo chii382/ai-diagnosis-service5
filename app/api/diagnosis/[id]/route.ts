@@ -1,5 +1,9 @@
 import { auth } from "@/auth";
-import { serializeDiagnosis, validateDiagnosisUpdate } from "@/lib/diagnosis/serialize";
+import {
+  diagnosisRecordFromMongo,
+  serializeDiagnosis,
+  validateDiagnosisUpdate,
+} from "@/lib/diagnosis/serialize";
 import { getDiagnosesCollection } from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
 import { NextResponse } from "next/server";
@@ -37,15 +41,19 @@ export async function GET(_request: Request, context: RouteContext) {
   }
 
   return NextResponse.json(
-    serializeDiagnosis({
-      _id: doc._id,
-      userId: doc.userId as ObjectId,
-      answers: doc.answers,
-      result: doc.result,
-      careerRoadmap: doc.careerRoadmap,
-      createdAt: doc.createdAt as Date,
-      updatedAt: doc.updatedAt as Date,
-    }),
+    serializeDiagnosis(
+      diagnosisRecordFromMongo({
+        _id: doc._id,
+        userId: doc.userId as ObjectId,
+        answers: doc.answers,
+        result: doc.result,
+        resultBrief: doc.resultBrief,
+        careerRoadmap: doc.careerRoadmap,
+        careerRoadmapBrief: doc.careerRoadmapBrief,
+        createdAt: doc.createdAt as Date,
+        updatedAt: doc.updatedAt as Date,
+      }),
+    ),
   );
 }
 
@@ -84,16 +92,16 @@ export async function PUT(request: Request, context: RouteContext) {
 
   const now = new Date();
   const diagnoses = await getDiagnosesCollection();
-  await diagnoses.updateOne(
-    { _id: doc._id },
-    {
-      $set: {
-        result: validated.result,
-        careerRoadmap: validated.careerRoadmap,
-        updatedAt: now,
-      },
-    },
-  );
+  const updateFields: Record<string, unknown> = {
+    result: validated.result,
+    careerRoadmap: validated.careerRoadmap,
+    updatedAt: now,
+  };
+  if (validated.careerRoadmapBrief) {
+    updateFields.careerRoadmapBrief = validated.careerRoadmapBrief;
+  }
+
+  await diagnoses.updateOne({ _id: doc._id }, { $set: updateFields });
 
   return NextResponse.json(
     serializeDiagnosis({
@@ -101,7 +109,9 @@ export async function PUT(request: Request, context: RouteContext) {
       userId: doc.userId as ObjectId,
       answers: doc.answers,
       result: validated.result,
+      resultBrief: doc.resultBrief,
       careerRoadmap: validated.careerRoadmap,
+      careerRoadmapBrief: validated.careerRoadmapBrief ?? doc.careerRoadmapBrief,
       createdAt: doc.createdAt as Date,
       updatedAt: now,
     }),
