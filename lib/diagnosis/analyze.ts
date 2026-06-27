@@ -5,6 +5,7 @@ import {
   ensureCompleteSentence,
 } from "@/lib/diagnosis/plan-content";
 import { buildDiagnosisPrompt } from "@/lib/diagnosis/prompts";
+import { resolveCareerPathPattern } from "@/lib/diagnosis/resolve-career-path-pattern";
 import type {
   CareerRoadmap,
   CareerRoadmapBrief,
@@ -44,7 +45,15 @@ function asStringArray(value: unknown, field: string): string[] {
   return value.map((item) => item.trim()).filter(Boolean);
 }
 
-function parseResult(value: unknown, field: string): DiagnosisResult {
+type ParsedResultCore = {
+  summary: string;
+  advice: string;
+  strengths: string[];
+  recommendedDirections: string[];
+  careerPathPatternId?: string;
+};
+
+function parseResultCore(value: unknown, field: string): ParsedResultCore {
   if (!value || typeof value !== "object") {
     throw new Error(`AI response field "${field}" is invalid`);
   }
@@ -54,6 +63,8 @@ function parseResult(value: unknown, field: string): DiagnosisResult {
   if (!summary || !advice) {
     throw new Error(`AI response field "${field}" is invalid`);
   }
+  const careerPathPatternId =
+    typeof obj.careerPathPatternId === "string" ? obj.careerPathPatternId.trim() : undefined;
   return {
     summary,
     advice,
@@ -62,6 +73,27 @@ function parseResult(value: unknown, field: string): DiagnosisResult {
       obj.recommendedDirections,
       `${field}.recommendedDirections`,
     ),
+    careerPathPatternId,
+  };
+}
+
+function applyCareerPathPattern(
+  core: ParsedResultCore,
+  answers: DiagnosisAnswers,
+  profileContext?: DiagnosisProfileContext | null,
+): DiagnosisResult {
+  const resolved = resolveCareerPathPattern({
+    patternIdFromAi: core.careerPathPatternId,
+    answers,
+    profileContext,
+  });
+  return {
+    summary: core.summary,
+    advice: core.advice,
+    strengths: core.strengths,
+    recommendedDirections: core.recommendedDirections,
+    careerPathPatternId: resolved.patternId,
+    careerPathHeadline: resolved.label,
   };
 }
 
@@ -142,25 +174,34 @@ export type AnalysisOutput = {
   careerRoadmapBrief: CareerRoadmapBrief;
 };
 
-export function parseAnalysisResponse(raw: string): AnalysisOutput {
+export function parseAnalysisResponse(
+  raw: string,
+  answers: DiagnosisAnswers,
+  profileContext?: DiagnosisProfileContext | null,
+): AnalysisOutput {
   const parsed = JSON.parse(extractJson(raw)) as Record<string, unknown>;
 
   const resultRaw = parsed.result ?? parsed;
-  const result = parseResult(resultRaw, "result");
+  const resultCore = parseResultCore(resultRaw, "result");
+  const result = applyCareerPathPattern(resultCore, answers, profileContext);
 
   const resultBriefRaw = parsed.resultBrief;
-  const resultBriefParsed = resultBriefRaw
-    ? parseResult(resultBriefRaw, "resultBrief")
+  const resultBriefCore = resultBriefRaw
+    ? parseResultCore(resultBriefRaw, "resultBrief")
     : {
         summary: result.summary,
         strengths: result.strengths.slice(0, 1),
         recommendedDirections: result.recommendedDirections.slice(0, 1),
+        careerPathPatternId: result.careerPathPatternId,
         advice: result.advice,
       };
-  const resultBrief = {
+  const resultBriefParsed = applyCareerPathPattern(resultBriefCore, answers, profileContext);
+  const resultBrief: DiagnosisResultBrief = {
     ...resultBriefParsed,
     summary: ensureCompleteSentence(resultBriefParsed.summary),
     advice: ensureCompleteSentence(resultBriefParsed.advice),
+    careerPathPatternId: result.careerPathPatternId,
+    careerPathHeadline: result.careerPathHeadline,
   };
 
   const roadmapRaw = parsed.careerRoadmap;
@@ -203,5 +244,5 @@ export async function analyzeDiagnosisAnswers(
     throw new Error("AI response was empty");
   }
 
-  return parseAnalysisResponse(text);
+  return parseAnalysisResponse(text, answers, profileContext);
 }

@@ -7,6 +7,7 @@ import type {
   DiagnosisResult,
   DiagnosisResultBrief,
 } from "@/lib/diagnosis/types";
+import { getCareerPathPatternLabel } from "@/lib/diagnosis/career-path-patterns";
 import { canViewPremiumContent, type UserPlan } from "@/lib/plan";
 
 function hasTruncationEllipsis(text: string): boolean {
@@ -72,6 +73,12 @@ export function deriveResultBrief(result: DiagnosisResult): DiagnosisResultBrief
     summary: ensureCompleteSentence(result.summary),
     strengths: result.strengths.slice(0, 1),
     recommendedDirections: result.recommendedDirections.slice(0, 1),
+    careerPathPatternId: result.careerPathPatternId,
+    careerPathHeadline:
+      result.careerPathHeadline ??
+      (result.careerPathPatternId
+        ? getCareerPathPatternLabel(result.careerPathPatternId)
+        : undefined),
     advice: ensureCompleteSentence(result.advice),
   };
 }

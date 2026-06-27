@@ -1,5 +1,6 @@
 import type { NextAuthConfig } from "next-auth";
 import Google from "next-auth/providers/google";
+import { normalizeUserRole, type UserRole } from "@/lib/user/types";
 
 function buildProviders() {
   const clientId = process.env.GOOGLE_CLIENT_ID;
@@ -13,7 +14,6 @@ function buildProviders() {
     Google({
       clientId,
       clientSecret,
-      // clientSecret ありのサーバー OAuth では state のみで十分（PKCE Cookie 問題を回避）
       checks: ["state"],
     }),
   ];
@@ -40,6 +40,11 @@ export const authConfig = {
         pathname.startsWith("/dashboard") ||
         pathname.startsWith("/profile") ||
         pathname.startsWith("/diagnosis");
+      const isAdminRoute = pathname.startsWith("/admin");
+
+      if (isAdminRoute) {
+        return auth?.user?.role === "admin";
+      }
 
       if (isProtected) {
         return !!auth?.user;
@@ -56,6 +61,12 @@ export const authConfig = {
       if (trigger === "update" && session?.image && typeof session.image === "string") {
         token.picture = session.image;
       }
+      if (trigger === "update" && session?.role) {
+        token.role = session.role as UserRole;
+      }
+      if (!token.role) {
+        token.role = "user";
+      }
       return token;
     },
     async session({ session, token }) {
@@ -65,6 +76,7 @@ export const authConfig = {
       if (typeof token.picture === "string") {
         session.user.image = token.picture;
       }
+      session.user.role = normalizeUserRole(token.role);
       return session;
     },
   },

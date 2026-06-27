@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useSession } from "next-auth/react";
 import AppBar from "@mui/material/AppBar";
 import LogoutConfirmDialog from "@/app/components/auth/LogoutConfirmDialog";
 import { useLogoutConfirm } from "@/app/components/auth/useLogoutConfirm";
@@ -41,7 +42,16 @@ export default function MemberNav({
   transparent = false,
 }: MemberNavProps) {
   const pathname = usePathname();
+  const { data: session } = useSession();
+  const isAdmin = session?.user?.role === "admin";
   const { open, submitting, requestLogout, cancelLogout, confirmLogout } = useLogoutConfirm("/");
+
+  const links = isAdmin
+    ? [...navLinks, { href: "/admin", label: "管理", match: (path: string) => path.startsWith("/admin") }]
+    : navLinks;
+
+  const displayName = userName ?? session?.user?.name ?? null;
+  const displayImage = userImage ?? session?.user?.image ?? null;
 
   return (
     <>
@@ -75,7 +85,7 @@ export default function MemberNav({
         </Link>
 
         <Stack direction="row" spacing={0.5} sx={{ flex: 1 }}>
-          {navLinks.map((link) => {
+          {links.map((link) => {
             const active = link.match(pathname);
             return (
               <Button
@@ -93,13 +103,15 @@ export default function MemberNav({
 
         <Stack direction="row" alignItems="center" spacing={1.25}>
           <Avatar
-            src={userImage ?? undefined}
-            alt={userName ?? "ユーザー"}
+            src={displayImage ?? undefined}
+            alt={displayName ?? "ユーザー"}
             sx={{ width: 32, height: 32, border: "1px solid rgba(255,255,255,0.2)" }}
-          />
+          >
+            {displayName?.charAt(0) ?? "?"}
+          </Avatar>
           <Box sx={{ display: { xs: "none", md: "block" } }}>
             <Typography variant="body2" sx={{ color: "rgba(255,255,255,0.85)", maxWidth: 160 }} noWrap>
-              {userName ?? "ゲスト"}
+              {displayName ?? "ゲスト"}
             </Typography>
           </Box>
           <Button

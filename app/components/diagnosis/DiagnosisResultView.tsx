@@ -20,6 +20,7 @@ import PlanUpgradeNotice from "@/app/components/diagnosis/PlanUpgradeNotice";
 import RoadmapBriefBody from "@/app/components/diagnosis/RoadmapBriefBody";
 import RoadmapPhaseBody from "@/app/components/diagnosis/RoadmapPhaseBody";
 import JpBulletText from "@/app/components/common/JpBulletText";
+import { getCareerPathDisplayLabel } from "@/lib/diagnosis/career-path-display";
 import {
   FREE_PLAN_ROADMAP_NOTICE,
   getResultForPlan,
@@ -195,6 +196,26 @@ export default function DiagnosisResultView({
                 ))}
               </Stack>
             </Stack>
+            <Box
+              sx={{
+                p: 2,
+                borderRadius: 2,
+                backgroundColor: "rgba(34,211,238,0.08)",
+                border: "1px solid rgba(34,211,238,0.28)",
+              }}
+            >
+              <Typography sx={{ fontWeight: 700, mb: 1 }}>ずばりあなたのキャリアパスは？</Typography>
+              <Typography
+                sx={{
+                  fontWeight: 700,
+                  fontSize: { xs: "1.05rem", md: "1.15rem" },
+                  lineHeight: 1.6,
+                  color: "rgba(255,255,255,0.95)",
+                }}
+              >
+                {getCareerPathDisplayLabel(result)}
+              </Typography>
+            </Box>
             <Box
               sx={{
                 p: 2,

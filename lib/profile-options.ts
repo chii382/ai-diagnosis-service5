@@ -51,3 +51,23 @@ export function parseBio(value: unknown): string {
   if (typeof value !== "string") return "";
   return value.trim().slice(0, BIO_MAX_LENGTH);
 }
+
+function findLabel(
+  options: ReadonlyArray<{ value: string; label: string }>,
+  value: string | null | undefined,
+): string {
+  if (!value) return "未設定";
+  return options.find((o) => o.value === value)?.label ?? "未設定";
+}
+
+export function getGenderLabel(value: string | null | undefined): string {
+  return findLabel(GENDER_OPTIONS, value);
+}
+
+export function getAgeRangeLabel(value: string | null | undefined): string {
+  return findLabel(AGE_RANGE_OPTIONS, value);
+}
+
+export function getOccupationLabel(value: string | null | undefined): string {
+  return findLabel(OCCUPATION_OPTIONS, value);
+}

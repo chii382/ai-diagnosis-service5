@@ -22,6 +22,10 @@ export type DiagnosisResult = {
   summary: string;
   strengths: string[];
   recommendedDirections: string[];
+  /** キャリアパスマスタ ID（集計キー） */
+  careerPathPatternId?: string;
+  /** 「ずばり〜」表示ラベル（マスタから設定） */
+  careerPathHeadline?: string;
   advice: string;
 };
 
@@ -30,6 +34,8 @@ export type DiagnosisResultBrief = {
   summary: string;
   strengths: string[];
   recommendedDirections: string[];
+  careerPathPatternId?: string;
+  careerPathHeadline?: string;
   advice: string;
 };
 

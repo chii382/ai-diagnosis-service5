@@ -1,7 +1,18 @@
 export type UserPlan = "free" | "standard" | "premium";
 
+export const DEFAULT_USER_PLAN: UserPlan = "free";
+
 /** 確認用: true の間は有料チャートをモザイクなしで表示 */
 export const PREVIEW_PREMIUM_CHARTS = false;
+
+export function normalizeUserPlan(plan: unknown): UserPlan {
+  if (plan === "standard" || plan === "premium") return plan;
+  return "free";
+}
+
+export function isPaidPlan(plan: UserPlan): boolean {
+  return plan !== "free";
+}
 
 export function canViewPremiumCharts(plan: UserPlan): boolean {
   if (PREVIEW_PREMIUM_CHARTS) return true;
@@ -19,7 +30,19 @@ export function canEditDiagnosisResult(_plan: UserPlan): boolean {
 }
 
 export function getDefaultUserPlan(): UserPlan {
-  return "free";
+  return DEFAULT_USER_PLAN;
+}
+
+/** 管理画面向けの短いプラン表示 */
+export function getPlanAdminLabel(plan: UserPlan): string {
+  switch (plan) {
+    case "standard":
+      return "有料（スタンダード）";
+    case "premium":
+      return "有料（宇宙級）";
+    default:
+      return "無料";
+  }
 }
 
 export function getPlanLabel(plan: UserPlan): string {

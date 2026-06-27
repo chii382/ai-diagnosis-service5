@@ -7,6 +7,7 @@ import {
   serializeDiagnosisListItem,
 } from "@/lib/diagnosis/serialize";
 import { getDiagnosesCollection, getUsersCollection } from "@/lib/mongodb";
+import { persistErrorLog } from "@/lib/sentry/error-log";
 import { ObjectId } from "mongodb";
 import { NextResponse } from "next/server";
 
@@ -82,7 +83,9 @@ export async function POST(request: Request) {
         })
       : null;
 
+    const analysisStartedAt = Date.now();
     const analysis = await analyzeDiagnosisAnswers(validated.answers, profileContext);
+    const analysisDurationMs = Date.now() - analysisStartedAt;
     const now = new Date();
     const userId = new ObjectId(session.user.id);
 
@@ -94,6 +97,7 @@ export async function POST(request: Request) {
       resultBrief: analysis.resultBrief,
       careerRoadmap: analysis.careerRoadmap,
       careerRoadmapBrief: analysis.careerRoadmapBrief,
+      analysisDurationMs,
       createdAt: now,
       updatedAt: now,
     });
@@ -114,6 +118,14 @@ export async function POST(request: Request) {
     );
   } catch (error) {
     console.error("Diagnosis POST failed:", error);
+    const session = await auth().catch(() => null);
+    await persistErrorLog({
+      message: error instanceof Error ? error.message : "Diagnosis POST failed",
+      stack: error instanceof Error ? error.stack : undefined,
+      url: "/api/diagnosis",
+      userId: session?.user?.id,
+      level: "error",
+    });
     return NextResponse.json(
       { error: "診断の実行に失敗しました。時間をおいて再度お試しください。" },
       { status: 500 },

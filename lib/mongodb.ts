@@ -41,3 +41,8 @@ export async function getDiagnosesCollection() {
   const client = await getMongoClientPromise();
   return client.db().collection("diagnoses");
 }
+
+export async function getErrorLogsCollection() {
+  const client = await getMongoClientPromise();
+  return client.db().collection("error_logs");
+}

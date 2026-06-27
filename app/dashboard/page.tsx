@@ -1,3 +1,4 @@
+import Alert from "@mui/material/Alert";
 import Link from "next/link";
 import { buildProfileHref } from "@/lib/navigation";
 import { auth } from "@/auth";
@@ -18,6 +19,10 @@ import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import MemberNav from "@/app/components/member/MemberNav";
 import MemberCinematicBackground from "@/app/components/member/MemberCinematicBackground";
+import {
+  ADMIN_ACCESS_DENIED_MESSAGE,
+  ADMIN_ACCESS_DENIED_QUERY,
+} from "@/lib/admin/require-admin";
 import { getDefaultUserPlan, getPlanLabel } from "@/lib/plan";
 import { jpTextSx } from "@/lib/typography";
 import { fetchUserProfileForUser } from "@/lib/user/server";
@@ -61,11 +66,18 @@ const linkButtonSx = {
   },
 } as const;
 
-export default async function DashboardPage() {
+type DashboardPageProps = {
+  searchParams: Promise<{ error?: string }>;
+};
+
+export default async function DashboardPage({ searchParams }: DashboardPageProps) {
   const session = await auth();
   if (!session?.user?.id) {
     redirect("/auth/signin");
   }
+
+  const { error } = await searchParams;
+  const adminAccessDenied = error === ADMIN_ACCESS_DENIED_QUERY;
 
   const dbUser = await fetchUserProfileForUser(session.user.id);
   if (!dbUser) {
@@ -91,6 +103,11 @@ export default async function DashboardPage() {
 
         <Container maxWidth="lg" sx={{ py: { xs: 5, md: 8 } }}>
           <Stack spacing={{ xs: 4, md: 5 }}>
+            {adminAccessDenied && (
+              <Alert severity="error" sx={{ maxWidth: 720 }}>
+                {ADMIN_ACCESS_DENIED_MESSAGE}
+              </Alert>
+            )}
             <Stack spacing={2} sx={{ maxWidth: 720 }}>
               <Typography
                 sx={{

@@ -4,6 +4,7 @@ import HeroSection from "@/app/components/HeroSection";
 import PainSection from "@/app/components/PainSection";
 import FeaturesSection from "@/app/components/FeaturesSection";
 import StepsSection from "@/app/components/StepsSection";
+import PricingSection from "@/app/components/PricingSection";
 import CTASection from "@/app/components/CTASection";
 import Footer from "@/app/components/Footer";
 
@@ -16,6 +17,7 @@ export default function Home() {
         <PainSection />
         <FeaturesSection />
         <StepsSection />
+        <PricingSection />
         <CTASection />
       </Box>
       <Footer />

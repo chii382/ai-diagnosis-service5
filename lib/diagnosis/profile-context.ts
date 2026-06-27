@@ -9,6 +9,8 @@ export type DiagnosisProfileContext = {
   gender?: string;
   ageRange?: string;
   occupation?: string;
+  /** 職種コード（office_worker, engineer 等） */
+  occupationValue?: string;
   bio?: string;
 };
 
@@ -32,6 +34,7 @@ export function buildDiagnosisProfileContext(user: {
   const ageRange = labelFromOptions(AGE_RANGE_OPTIONS, user.ageRange);
   const occupation = labelFromOptions(OCCUPATION_OPTIONS, user.occupation);
   const bio = user.bio?.trim() || undefined;
+  const occupationValue = user.occupation?.trim() || undefined;
 
   const hasProfileInput = Boolean(gender || ageRange || occupation || bio);
   if (!hasProfileInput) return null;
@@ -41,6 +44,7 @@ export function buildDiagnosisProfileContext(user: {
     ...(gender && { gender }),
     ...(ageRange && { ageRange }),
     ...(occupation && { occupation }),
+    ...(occupationValue && { occupationValue }),
     ...(bio && { bio }),
   };
 }

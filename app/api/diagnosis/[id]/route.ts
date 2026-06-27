@@ -96,6 +96,7 @@ export async function PUT(request: Request, context: RouteContext) {
     result: validated.result,
     careerRoadmap: validated.careerRoadmap,
     updatedAt: now,
+    userEditedAt: now,
   };
   if (validated.careerRoadmapBrief) {
     updateFields.careerRoadmapBrief = validated.careerRoadmapBrief;

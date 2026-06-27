@@ -12,10 +12,21 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
+import FormControl from "@mui/material/FormControl";
+import InputLabel from "@mui/material/InputLabel";
+import ListSubheader from "@mui/material/ListSubheader";
+import MenuItem from "@mui/material/MenuItem";
+import Select from "@mui/material/Select";
 import Stack from "@mui/material/Stack";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import SaveIcon from "@mui/icons-material/Save";
+import { getResolvedCareerPath } from "@/lib/diagnosis/career-path-headline";
+import {
+  CAREER_PATH_CATEGORIES,
+  CAREER_PATH_PATTERNS,
+  getCareerPathPatternLabel,
+} from "@/lib/diagnosis/career-path-patterns";
 import { resolveRoadmapBrief } from "@/lib/diagnosis/plan-content";
 import type { DiagnosisDocument } from "@/lib/diagnosis/types";
 import { glassCardSx } from "@/app/components/member/memberStyles";
@@ -43,12 +54,17 @@ export default function DiagnosisEditForm({ diagnosis, returnTo }: DiagnosisEdit
   const isPremium = canViewPremiumContent(plan);
   const initialRoadmapBrief = resolveRoadmapBrief(diagnosis);
 
+  const initialCareerPathPatternId = getResolvedCareerPath(diagnosis.result, {
+    answers: diagnosis.answers,
+  }).patternId;
+
   const [summary, setSummary] = useState(diagnosis.result.summary);
   const [advice, setAdvice] = useState(diagnosis.result.advice);
   const [strengthsText, setStrengthsText] = useState(arrayToLines(diagnosis.result.strengths));
   const [directionsText, setDirectionsText] = useState(
     arrayToLines(diagnosis.result.recommendedDirections),
   );
+  const [careerPathPatternId, setCareerPathPatternId] = useState(initialCareerPathPatternId);
   const [shortOverview, setShortOverview] = useState(initialRoadmapBrief.shortTerm.overview);
   const [midOverview, setMidOverview] = useState(initialRoadmapBrief.midTerm.overview);
   const [longOverview, setLongOverview] = useState(initialRoadmapBrief.longTerm.overview);
@@ -81,7 +97,9 @@ export default function DiagnosisEditForm({ diagnosis, returnTo }: DiagnosisEdit
       summary !== result.summary ||
       advice !== result.advice ||
       strengthsText !== arrayToLines(result.strengths) ||
-      directionsText !== arrayToLines(result.recommendedDirections);
+      directionsText !== arrayToLines(result.recommendedDirections) ||
+      careerPathPatternId !==
+        getResolvedCareerPath(result, { answers: diagnosis.answers }).patternId;
 
     if (isPremium) {
       const { careerRoadmap } = diagnosis;
@@ -110,6 +128,7 @@ export default function DiagnosisEditForm({ diagnosis, returnTo }: DiagnosisEdit
     advice,
     strengthsText,
     directionsText,
+    careerPathPatternId,
     shortOverview,
     midOverview,
     longOverview,
@@ -170,6 +189,7 @@ export default function DiagnosisEditForm({ diagnosis, returnTo }: DiagnosisEdit
         advice: advice.trim(),
         strengths: linesToArray(strengthsText),
         recommendedDirections: linesToArray(directionsText),
+        careerPathPatternId,
       },
       careerRoadmap: {
         shortTerm: {
@@ -272,6 +292,29 @@ export default function DiagnosisEditForm({ diagnosis, returnTo }: DiagnosisEdit
               value={directionsText}
               onChange={(e) => setDirectionsText(e.target.value)}
             />
+            <FormControl fullWidth>
+              <InputLabel id="career-path-pattern-label">ずばりあなたのキャリアパスは？</InputLabel>
+              <Select
+                labelId="career-path-pattern-label"
+                label="ずばりあなたのキャリアパスは？"
+                value={careerPathPatternId}
+                onChange={(e) => setCareerPathPatternId(e.target.value)}
+              >
+                {CAREER_PATH_CATEGORIES.map((category) => [
+                  <ListSubheader key={`cat-${category.id}`}>{category.label}</ListSubheader>,
+                  ...CAREER_PATH_PATTERNS.filter((pattern) => pattern.categoryId === category.id).map(
+                    (pattern) => (
+                      <MenuItem key={pattern.id} value={pattern.id}>
+                        {pattern.label}
+                      </MenuItem>
+                    ),
+                  ),
+                ])}
+              </Select>
+              <Typography sx={{ mt: 1, color: "rgba(255,255,255,0.65)", fontSize: "0.88rem" }}>
+                選択中: {getCareerPathPatternLabel(careerPathPatternId)}
+              </Typography>
+            </FormControl>
             <TextField
               label="AIからのアドバイス"
               multiline

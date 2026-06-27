@@ -11,6 +11,7 @@ import HeaderAuthActions from "@/app/components/HeaderAuthActions";
 const navItems = [
   { label: "WHY CHOOSE US", href: "#features" },
   { label: "HOW IT WORKS", href: "#steps" },
+  { label: "PRICING", href: "#pricing" },
   { label: "START NOW", href: "#start" },
 ];
 

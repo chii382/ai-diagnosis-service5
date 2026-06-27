@@ -8,6 +8,7 @@ import type {
   DiagnosisResult,
   DiagnosisResultBrief,
 } from "@/lib/diagnosis/types";
+import { getCareerPathPatternLabel, isValidCareerPathPatternId } from "@/lib/diagnosis/career-path-patterns";
 
 export type DiagnosisRecord = {
   _id: ObjectId;
@@ -103,6 +104,14 @@ export function validateDiagnosisUpdate(input: unknown):
     return { ok: false, error: "強みとおすすめ方向性を1件以上入力してください" };
   }
 
+  const careerPathPatternIdRaw =
+    typeof resultObj.careerPathPatternId === "string" ? resultObj.careerPathPatternId.trim() : "";
+  if (!careerPathPatternIdRaw || !isValidCareerPathPatternId(careerPathPatternIdRaw)) {
+    return { ok: false, error: "キャリアパスパターンを選択してください" };
+  }
+  const careerPathPatternId = careerPathPatternIdRaw;
+  const careerPathHeadline = getCareerPathPatternLabel(careerPathPatternId);
+
   const parsePhase = (value: unknown) => {
     if (!value || typeof value !== "object") return null;
     const phase = value as Record<string, unknown>;
@@ -156,7 +165,7 @@ export function validateDiagnosisUpdate(input: unknown):
 
   return {
     ok: true,
-    result: { summary, strengths, recommendedDirections, advice },
+    result: { summary, strengths, recommendedDirections, careerPathPatternId, careerPathHeadline, advice },
     careerRoadmap: { shortTerm, midTerm, longTerm },
     careerRoadmapBrief,
   };

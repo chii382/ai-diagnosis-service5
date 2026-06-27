@@ -20,3 +20,16 @@ export function isCustomAvatarPath(image: string | null | undefined): boolean {
 export function isLocalAvatarPath(image: string | null | undefined): boolean {
   return Boolean(image?.startsWith("/uploads/avatars/"));
 }
+
+/** 管理画面など、他ユーザーのアイコンを表示するときの URL に変換する */
+export function resolveAvatarUrlForUser(
+  userId: string,
+  image: string | null | undefined,
+): string {
+  if (!image) return "";
+  if (isCustomAvatarPath(image)) {
+    const query = image.includes("?") ? image.slice(image.indexOf("?")) : "";
+    return `/api/admin/users/${userId}/avatar${query}`;
+  }
+  return image;
+}
