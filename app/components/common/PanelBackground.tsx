@@ -7,6 +7,8 @@ interface PanelBackgroundProps {
   mobilePosition?: string;
   backgroundSize?: string;
   mobileBackgroundSize?: string;
+  /** false のときズームアニメーションを止め、img でシャープに表示 */
+  animated?: boolean;
 }
 
 export default function PanelBackground({
@@ -16,7 +18,43 @@ export default function PanelBackground({
   mobilePosition,
   backgroundSize = "cover",
   mobileBackgroundSize = "auto 100%",
+  animated = true,
 }: PanelBackgroundProps) {
+  if (!animated) {
+    return (
+      <>
+        <Box
+          component="img"
+          src={src}
+          alt=""
+          aria-hidden
+          sx={{
+            position: "absolute",
+            inset: 0,
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            objectPosition: {
+              xs: mobilePosition ?? position,
+              md: position,
+            },
+            display: "block",
+            pointerEvents: "none",
+            userSelect: "none",
+          }}
+        />
+        <Box
+          aria-hidden
+          sx={{
+            position: "absolute",
+            inset: 0,
+            background: overlay,
+          }}
+        />
+      </>
+    );
+  }
+
   return (
     <>
       <Box

@@ -110,9 +110,12 @@ export default function PricingSection() {
       }}
     >
       <PanelBackground
-        src="/images/cta-cosmos.png"
-        position="center top"
-        overlay="linear-gradient(180deg, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.62) 45%, rgba(0,0,0,0.85) 100%)"
+        src="/images/pricing-section-bg.png"
+        position="center center"
+        backgroundSize="cover"
+        mobileBackgroundSize="cover"
+        animated={false}
+        overlay="linear-gradient(180deg, rgba(0,0,0,0.32) 0%, rgba(0,0,0,0.12) 50%, rgba(0,0,0,0.38) 100%)"
       />
 
       <Container maxWidth="lg" sx={{ position: "relative", zIndex: 1 }}>
@@ -150,9 +153,7 @@ export default function PricingSection() {
             p: { xs: 2, md: 3 },
             borderRadius: 4,
             border: "1px solid rgba(255,255,255,0.12)",
-            background:
-              "linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%)",
-            backdropFilter: "blur(8px)",
+            backgroundColor: "rgba(8,12,24,0.45)",
             boxShadow: "0 24px 80px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.08)",
           }}
         >
@@ -170,7 +171,7 @@ export default function PricingSection() {
                       p: { xs: 3, md: 3.25 },
                       borderRadius: 3,
                       border: `1px solid ${plan.accent}${plan.highlight ? "" : "66"}`,
-                      background: `linear-gradient(180deg, ${plan.accent}18 0%, rgba(0,0,0,0.55) 70%)`,
+                      background: `linear-gradient(180deg, ${plan.accent}14 0%, rgba(0,0,0,0.32) 100%)`,
                       boxShadow: plan.highlight
                         ? `0 0 0 1px ${plan.accent}, 0 20px 60px ${plan.glow}`
                         : `0 12px 40px ${plan.glow}`,
