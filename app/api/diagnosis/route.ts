@@ -98,6 +98,7 @@ export async function POST(request: Request) {
       careerRoadmap: analysis.careerRoadmap,
       careerRoadmapBrief: analysis.careerRoadmapBrief,
       analysisDurationMs,
+      aiTokenUsage: analysis.aiTokenUsage,
       createdAt: now,
       updatedAt: now,
     });

@@ -54,6 +54,34 @@ function formatMonthKey(date: Date): string {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
 }
 
+/** ミリ秒を人が読みやすい時間表記に変換 */
+export function formatDurationMs(ms: number): string {
+  const { value, unit } = formatDurationParts(ms);
+  return `${value}${unit}`;
+}
+
+/** 数値と単位を分けて返す（管理画面のメトリクス表示用） */
+export function formatDurationParts(ms: number): { value: number; unit: string } {
+  if (ms < 1000) {
+    return { value: Math.round(ms), unit: "ミリ秒" };
+  }
+  if (ms < 60_000) {
+    return { value: Math.round(ms / 100) / 10, unit: "秒" };
+  }
+  return { value: Math.round(ms / 600) / 10, unit: "分" };
+}
+
+export function getMonthlyAiTokenLimit(): number {
+  const raw = process.env.AI_TOKEN_MONTHLY_LIMIT?.trim();
+  const parsed = raw ? Number(raw) : NaN;
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 500_000;
+}
+
+function sumAiTokenUsage(doc: Record<string, unknown>): number {
+  const usage = doc.aiTokenUsage as { totalTokens?: number } | undefined;
+  return typeof usage?.totalTokens === "number" && usage.totalTokens > 0 ? usage.totalTokens : 0;
+}
+
 const ageLabelMap = Object.fromEntries(AGE_RANGE_OPTIONS.map((o) => [o.value, o.label]));
 const occupationLabelMap = Object.fromEntries(
   OCCUPATION_OPTIONS.map((o) => [o.value, o.label]),
@@ -144,7 +172,13 @@ export type AdminAnalyticsData = {
     repeatDiagnosisRate: number;
     diagnosisApiFailureRate: number;
     avgDiagnosesPerActiveUser: number;
-    avgAnalysisDurationSec: number | null;
+    avgAnalysisDurationMs: number;
+    avgAnalysisDurationValue: number;
+    avgAnalysisDurationUnit: string;
+    avgAnalysisDurationDisplay: string;
+    monthlyAiTokenTotal: number;
+    monthlyAiTokenLimit: number;
+    monthlyAiTokenDiagnosisCount: number;
     diagnosisSuccessCount: number;
     diagnosisFailureCount: number;
   };
@@ -429,7 +463,9 @@ export async function fetchAdminAnalytics(period: AnalyticsPeriod): Promise<Admi
     rangeStart.setDate(1);
   }
 
-  const [diagnosisDocs, totalUsers, usersWithDiagnosisAgg, userDocsWithDiagnosis, allUserDocs, diagnosisApiErrors] =
+  const monthStart = startOfMonth(now);
+
+  const [diagnosisDocs, totalUsers, usersWithDiagnosisAgg, userDocsWithDiagnosis, allUserDocs, diagnosisApiErrors, monthlyDiagnosisDocs] =
     await Promise.all([
       diagnoses.find({ createdAt: { $gte: rangeStart } }).toArray(),
       users.countDocuments({}),
@@ -460,6 +496,9 @@ export async function fetchAdminAnalytics(period: AnalyticsPeriod): Promise<Admi
           ],
         }),
       ),
+      diagnoses
+        .find({ createdAt: { $gte: monthStart } }, { projection: { aiTokenUsage: 1 } })
+        .toArray(),
     ]);
 
   const trendMap = new Map<string, number>();
@@ -622,8 +661,21 @@ export async function fetchAdminAnalytics(period: AnalyticsPeriod): Promise<Admi
     periodActiveUsers > 0
       ? Math.round((diagnosisSuccessCount / periodActiveUsers) * 100) / 100
       : 0;
-  const avgAnalysisDurationSec =
-    durationCount > 0 ? Math.round(durationTotalMs / durationCount / 100) / 10 : null;
+  const avgAnalysisDurationMs =
+    durationCount > 0 ? Math.round(durationTotalMs / durationCount) : 0;
+  const avgDurationParts = formatDurationParts(avgAnalysisDurationMs);
+  const avgAnalysisDurationDisplay = formatDurationMs(avgAnalysisDurationMs);
+  const monthlyAiTokenLimit = getMonthlyAiTokenLimit();
+
+  let monthlyAiTokenTotal = 0;
+  let monthlyAiTokenDiagnosisCount = 0;
+  for (const doc of monthlyDiagnosisDocs) {
+    const tokens = sumAiTokenUsage(doc as Record<string, unknown>);
+    if (tokens > 0) {
+      monthlyAiTokenTotal += tokens;
+      monthlyAiTokenDiagnosisCount += 1;
+    }
+  }
 
   const usersWithDiagnosis = usersWithDiagnosisAgg[0]?.count ?? 0;
   const completionRate = totalUsers > 0 ? Math.round((usersWithDiagnosis / totalUsers) * 1000) / 10 : 0;
@@ -670,7 +722,13 @@ export async function fetchAdminAnalytics(period: AnalyticsPeriod): Promise<Admi
       repeatDiagnosisRate,
       diagnosisApiFailureRate,
       avgDiagnosesPerActiveUser,
-      avgAnalysisDurationSec,
+      avgAnalysisDurationMs,
+      avgAnalysisDurationValue: avgDurationParts.value,
+      avgAnalysisDurationUnit: avgDurationParts.unit,
+      avgAnalysisDurationDisplay,
+      monthlyAiTokenTotal,
+      monthlyAiTokenLimit,
+      monthlyAiTokenDiagnosisCount,
       diagnosisSuccessCount,
       diagnosisFailureCount,
     },
@@ -712,7 +770,13 @@ export function analyticsToCsv(data: AdminAnalyticsData): string {
   lines.push(`品質,診断API失敗率(%),${data.qualityMetrics.diagnosisApiFailureRate}`);
   lines.push(`品質,1ユーザー平均診断回数,${data.qualityMetrics.avgDiagnosesPerActiveUser}`);
   lines.push(
-    `品質,平均AI分析時間(秒),${data.qualityMetrics.avgAnalysisDurationSec ?? "—"}`,
+    `品質,診断平均時間,${data.qualityMetrics.avgAnalysisDurationDisplay}`,
+  );
+  lines.push(
+    `品質,今月のAIトークン合計,${data.qualityMetrics.monthlyAiTokenTotal}`,
+  );
+  lines.push(
+    `品質,今月のAIトークン上限,${data.qualityMetrics.monthlyAiTokenLimit}`,
   );
   return `\uFEFF${lines.join("\n")}`;
 }

@@ -167,18 +167,28 @@ function parseRoadmapBrief(value: unknown, field: string): CareerRoadmapBrief {
   };
 }
 
-export type AnalysisOutput = {
+export type AiTokenUsage = {
+  inputTokens: number;
+  outputTokens: number;
+  totalTokens: number;
+};
+
+export type ParsedAnalysisContent = {
   result: DiagnosisResult;
   resultBrief: DiagnosisResultBrief;
   careerRoadmap: CareerRoadmap;
   careerRoadmapBrief: CareerRoadmapBrief;
 };
 
+export type AnalysisOutput = ParsedAnalysisContent & {
+  aiTokenUsage: AiTokenUsage;
+};
+
 export function parseAnalysisResponse(
   raw: string,
   answers: DiagnosisAnswers,
   profileContext?: DiagnosisProfileContext | null,
-): AnalysisOutput {
+): ParsedAnalysisContent {
   const parsed = JSON.parse(extractJson(raw)) as Record<string, unknown>;
 
   const resultRaw = parsed.result ?? parsed;
@@ -244,5 +254,15 @@ export async function analyzeDiagnosisAnswers(
     throw new Error("AI response was empty");
   }
 
-  return parseAnalysisResponse(text, answers, profileContext);
+  const inputTokens = message.usage.input_tokens ?? 0;
+  const outputTokens = message.usage.output_tokens ?? 0;
+
+  return {
+    ...parseAnalysisResponse(text, answers, profileContext),
+    aiTokenUsage: {
+      inputTokens,
+      outputTokens,
+      totalTokens: inputTokens + outputTokens,
+    },
+  };
 }

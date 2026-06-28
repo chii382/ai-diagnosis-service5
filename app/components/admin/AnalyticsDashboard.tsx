@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -12,6 +12,7 @@ import Tab from "@mui/material/Tab";
 import Tabs from "@mui/material/Tabs";
 import Typography from "@mui/material/Typography";
 import DownloadIcon from "@mui/icons-material/Download";
+import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import {
   Bar,
   BarChart,
@@ -19,14 +20,17 @@ import {
   Legend,
   Line,
   LineChart,
-  ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
 } from "recharts";
+import AdminChartBox from "@/app/components/admin/AdminChartBox";
 import { adminGlassCardSx } from "@/app/components/admin/adminStyles";
 import StatCard from "@/app/components/admin/StatCard";
+import QualityDurationStatCard from "@/app/components/admin/QualityDurationStatCard";
+import MonthlyTokenUsageCard from "@/app/components/admin/MonthlyTokenUsageCard";
 import type { AdminAnalyticsData, AnalyticsPeriod } from "@/lib/admin/server";
+import { exportElementToPdf, getAnalyticsPeriodLabel } from "@/lib/admin/export-analytics-pdf";
 import { startProcessingPending, stopProcessingPending } from "@/lib/processing-pending";
 
 const chartTooltipStyle = {
@@ -44,6 +48,8 @@ export default function AnalyticsDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
+  const [pdfExporting, setPdfExporting] = useState(false);
+  const exportRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -74,6 +80,27 @@ export default function AnalyticsDashboard() {
     window.location.href = `/api/admin/analytics/export?period=${period}`;
   };
 
+  const handlePdfExport = async () => {
+    if (!exportRef.current || !data) return;
+    setPdfExporting(true);
+    setError(null);
+    startProcessingPending();
+    try {
+      exportRef.current.scrollIntoView({ block: "start", behavior: "instant" });
+      await new Promise<void>((resolve) => {
+        window.setTimeout(resolve, 200);
+      });
+      await exportElementToPdf(exportRef.current, {
+        filename: `analytics-${period}-${new Date().toISOString().slice(0, 10)}.pdf`,
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "PDFの生成に失敗しました");
+    } finally {
+      setPdfExporting(false);
+      stopProcessingPending();
+    }
+  };
+
   return (
     <Stack spacing={3}>
       {error && <Alert severity="error">{error}</Alert>}
@@ -92,18 +119,48 @@ export default function AnalyticsDashboard() {
           <Tab label="週別" value="week" />
           <Tab label="月別" value="month" />
         </Tabs>
-        <Button
-          variant="outlined"
-          startIcon={<DownloadIcon />}
-          onClick={handleExport}
-          sx={{ borderColor: "rgba(255,255,255,0.25)", color: "#fff" }}
-        >
-          CSVエクスポート
-        </Button>
+        <Stack direction={{ xs: "column", sm: "row" }} spacing={1}>
+          <Button
+            variant="outlined"
+            startIcon={<PictureAsPdfIcon />}
+            onClick={() => void handlePdfExport()}
+            disabled={!data || pdfExporting}
+            sx={{ borderColor: "rgba(255,255,255,0.25)", color: "#fff" }}
+          >
+            {pdfExporting ? "PDF生成中..." : "PDFエクスポート"}
+          </Button>
+          <Button
+            variant="outlined"
+            startIcon={<DownloadIcon />}
+            onClick={handleExport}
+            sx={{ borderColor: "rgba(255,255,255,0.25)", color: "#fff" }}
+          >
+            CSVエクスポート
+          </Button>
+        </Stack>
       </Stack>
 
       {data && mounted && (
-        <>
+        <Box
+          ref={exportRef}
+          sx={{
+            p: { xs: 2, md: 2.5 },
+            borderRadius: 3,
+            backgroundColor: "rgba(5,8,16,0.92)",
+            border: "1px solid rgba(255,255,255,0.08)",
+          }}
+        >
+          <Stack spacing={0.5} sx={{ mb: 3 }}>
+            <Typography variant="h5" sx={{ fontWeight: 700, color: "#fff" }}>
+              分析レポート
+            </Typography>
+            <Typography sx={{ color: "rgba(255,255,255,0.55)", fontSize: "0.85rem" }}>
+              集計期間: {getAnalyticsPeriodLabel(period)} ／ 出力日:{" "}
+              {new Date().toLocaleDateString("ja-JP")}
+            </Typography>
+          </Stack>
+
+          <Stack spacing={3}>
           <Grid container spacing={2}>
             <Grid size={{ xs: 12, sm: 4 }}>
               <StatCard label="診断完了率" value={`${data.completionRate}%`} accent="#4ade80" />
@@ -144,14 +201,13 @@ export default function AnalyticsDashboard() {
                 accent="#a78bfa"
               />
             </Grid>
-            <Grid size={{ xs: 12, md: 3 }}>
+            <Grid size={{ xs: 12, md: 3 }} sx={{ minWidth: 0 }}>
               <Card sx={{ ...adminGlassCardSx, height: "100%" }}>
                 <CardContent>
                   <Typography sx={{ mb: 1.5, fontWeight: 600, fontSize: "0.95rem" }}>
                     プラン別ユーザー数
                   </Typography>
-                  <Box sx={{ width: "100%", height: 160 }}>
-                    <ResponsiveContainer>
+                  <AdminChartBox height={160}>
                       <BarChart data={data.planStats.usersByPlan}>
                         <CartesianGrid stroke="rgba(255,255,255,0.08)" />
                         <XAxis dataKey="label" stroke="rgba(255,255,255,0.5)" fontSize={10} />
@@ -159,19 +215,17 @@ export default function AnalyticsDashboard() {
                         <Tooltip contentStyle={chartTooltipStyle.contentStyle} />
                         <Bar dataKey="count" name="ユーザー数" fill="#f472b6" radius={[4, 4, 0, 0]} />
                       </BarChart>
-                    </ResponsiveContainer>
-                  </Box>
+                  </AdminChartBox>
                 </CardContent>
               </Card>
             </Grid>
-            <Grid size={{ xs: 12, md: 3 }}>
+            <Grid size={{ xs: 12, md: 3 }} sx={{ minWidth: 0 }}>
               <Card sx={{ ...adminGlassCardSx, height: "100%" }}>
                 <CardContent>
                   <Typography sx={{ mb: 1.5, fontWeight: 600, fontSize: "0.95rem" }}>
                     プラン別診断数
                   </Typography>
-                  <Box sx={{ width: "100%", height: 160 }}>
-                    <ResponsiveContainer>
+                  <AdminChartBox height={160}>
                       <BarChart data={data.planStats.diagnosesByPlan}>
                         <CartesianGrid stroke="rgba(255,255,255,0.08)" />
                         <XAxis dataKey="label" stroke="rgba(255,255,255,0.5)" fontSize={10} />
@@ -179,8 +233,7 @@ export default function AnalyticsDashboard() {
                         <Tooltip contentStyle={chartTooltipStyle.contentStyle} />
                         <Bar dataKey="count" name="診断数" fill="#818cf8" radius={[4, 4, 0, 0]} />
                       </BarChart>
-                    </ResponsiveContainer>
-                  </Box>
+                  </AdminChartBox>
                 </CardContent>
               </Card>
             </Grid>
@@ -189,8 +242,7 @@ export default function AnalyticsDashboard() {
           <Card sx={adminGlassCardSx}>
             <CardContent>
               <Typography sx={{ mb: 2, fontWeight: 600 }}>診断数トレンド</Typography>
-              <Box sx={{ width: "100%", height: 320 }}>
-                <ResponsiveContainer>
+              <AdminChartBox height={320}>
                   <LineChart data={data.diagnosisTrend}>
                     <CartesianGrid stroke="rgba(255,255,255,0.08)" />
                     <XAxis dataKey="label" stroke="rgba(255,255,255,0.5)" fontSize={12} />
@@ -204,20 +256,19 @@ export default function AnalyticsDashboard() {
                       stroke="#60a5fa"
                       strokeWidth={2}
                       dot={false}
+                      isAnimationActive={false}
                     />
                   </LineChart>
-                </ResponsiveContainer>
-              </Box>
+              </AdminChartBox>
             </CardContent>
           </Card>
 
           <Grid container spacing={2}>
-            <Grid size={{ xs: 12, lg: 6 }}>
+            <Grid size={{ xs: 12, lg: 6 }} sx={{ minWidth: 0 }}>
               <Card sx={{ ...adminGlassCardSx, height: "100%" }}>
                 <CardContent>
                   <Typography sx={{ mb: 2, fontWeight: 600 }}>人気キャリアパス TOP10</Typography>
-                  <Box sx={{ width: "100%", height: 320 }}>
-                    <ResponsiveContainer>
+                  <AdminChartBox height={320}>
                       <BarChart data={data.topCareerPaths} layout="vertical" margin={{ left: 8, right: 16 }}>
                         <CartesianGrid stroke="rgba(255,255,255,0.08)" />
                         <XAxis type="number" stroke="rgba(255,255,255,0.5)" allowDecimals={false} />
@@ -231,18 +282,16 @@ export default function AnalyticsDashboard() {
                         <Tooltip contentStyle={chartTooltipStyle.contentStyle} />
                         <Bar dataKey="count" name="件数" fill="#818cf8" radius={[0, 4, 4, 0]} />
                       </BarChart>
-                    </ResponsiveContainer>
-                  </Box>
+                  </AdminChartBox>
                 </CardContent>
               </Card>
             </Grid>
-            <Grid size={{ xs: 12, lg: 6 }}>
+            <Grid size={{ xs: 12, lg: 6 }} sx={{ minWidth: 0 }}>
               <Stack spacing={2} sx={{ height: "100%" }}>
                 <Card sx={adminGlassCardSx}>
                   <CardContent>
                     <Typography sx={{ mb: 2, fontWeight: 600 }}>年代別傾向</Typography>
-                    <Box sx={{ width: "100%", height: 140 }}>
-                      <ResponsiveContainer>
+                    <AdminChartBox height={140}>
                         <BarChart data={data.demographics.byAgeRange}>
                           <CartesianGrid stroke="rgba(255,255,255,0.08)" />
                           <XAxis dataKey="label" stroke="rgba(255,255,255,0.5)" fontSize={11} />
@@ -250,15 +299,13 @@ export default function AnalyticsDashboard() {
                           <Tooltip contentStyle={chartTooltipStyle.contentStyle} />
                           <Bar dataKey="count" fill="#34d399" />
                         </BarChart>
-                      </ResponsiveContainer>
-                    </Box>
+                    </AdminChartBox>
                   </CardContent>
                 </Card>
                 <Card sx={adminGlassCardSx}>
                   <CardContent>
                     <Typography sx={{ mb: 2, fontWeight: 600 }}>職種別傾向</Typography>
-                    <Box sx={{ width: "100%", height: 140 }}>
-                      <ResponsiveContainer>
+                    <AdminChartBox height={140}>
                         <BarChart data={data.demographics.byOccupation.slice(0, 8)}>
                           <CartesianGrid stroke="rgba(255,255,255,0.08)" />
                           <XAxis dataKey="label" stroke="rgba(255,255,255,0.5)" fontSize={10} />
@@ -266,8 +313,7 @@ export default function AnalyticsDashboard() {
                           <Tooltip contentStyle={chartTooltipStyle.contentStyle} />
                           <Bar dataKey="count" fill="#fbbf24" />
                         </BarChart>
-                      </ResponsiveContainer>
-                    </Box>
+                    </AdminChartBox>
                   </CardContent>
                 </Card>
               </Stack>
@@ -277,8 +323,7 @@ export default function AnalyticsDashboard() {
           <Card sx={adminGlassCardSx}>
             <CardContent>
               <Typography sx={{ mb: 2, fontWeight: 600 }}>キャリアパスカテゴリ別（9分類）</Typography>
-              <Box sx={{ width: "100%", height: 320 }}>
-                <ResponsiveContainer>
+              <AdminChartBox height={320}>
                   <BarChart data={data.careerPathCategories}>
                     <CartesianGrid stroke="rgba(255,255,255,0.08)" />
                     <XAxis
@@ -294,8 +339,7 @@ export default function AnalyticsDashboard() {
                     <Tooltip contentStyle={chartTooltipStyle.contentStyle} />
                     <Bar dataKey="count" name="件数" fill="#22d3ee" radius={[4, 4, 0, 0]} />
                   </BarChart>
-                </ResponsiveContainer>
-              </Box>
+              </AdminChartBox>
             </CardContent>
           </Card>
 
@@ -336,23 +380,21 @@ export default function AnalyticsDashboard() {
               />
             </Grid>
             <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-              <StatCard
-                label="平均AI分析時間"
-                value={
-                  data.qualityMetrics.avgAnalysisDurationSec !== null
-                    ? `${data.qualityMetrics.avgAnalysisDurationSec}秒`
-                    : "—"
-                }
-                helper={
-                  data.qualityMetrics.avgAnalysisDurationSec !== null
-                    ? "診断APIの処理時間"
-                    : "新規診断からデータ蓄積中"
-                }
-                accent="#60a5fa"
+              <QualityDurationStatCard
+                value={data.qualityMetrics.avgAnalysisDurationValue}
+                unit={data.qualityMetrics.avgAnalysisDurationUnit}
+              />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+              <MonthlyTokenUsageCard
+                used={data.qualityMetrics.monthlyAiTokenTotal}
+                limit={data.qualityMetrics.monthlyAiTokenLimit}
+                diagnosisCount={data.qualityMetrics.monthlyAiTokenDiagnosisCount}
               />
             </Grid>
           </Grid>
-        </>
+          </Stack>
+        </Box>
       )}
 
       {loading && !data && (
