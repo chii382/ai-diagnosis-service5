@@ -7,6 +7,7 @@ import DiagnosisResultView from "@/app/components/diagnosis/DiagnosisResultView"
 import MemberPageShell from "@/app/components/member/MemberPageShell";
 import { eyebrowSx } from "@/app/components/member/memberStyles";
 import { fetchDiagnosisForUser } from "@/lib/diagnosis/server";
+import { fetchUserPlanForUser } from "@/lib/user/server";
 
 export const metadata = {
   title: "診断結果詳細 | AIキャリア診断",
@@ -30,6 +31,8 @@ export default async function DiagnosisDetailPage({ params }: PageProps) {
     redirect("/diagnosis/history");
   }
 
+  const plan = await fetchUserPlanForUser(session.user.id);
+
   return (
     <MemberPageShell
       userName={session.user.name}
@@ -44,7 +47,7 @@ export default async function DiagnosisDetailPage({ params }: PageProps) {
               診断結果詳細
             </Typography>
           </Stack>
-          <DiagnosisResultView diagnosis={diagnosis} returnTo={`/diagnosis/${id}`} />
+          <DiagnosisResultView diagnosis={diagnosis} plan={plan} returnTo={`/diagnosis/${id}`} />
         </Stack>
       </Container>
     </MemberPageShell>

@@ -854,3 +854,19 @@ body.processing-pending,
 body.processing-pending * {
   cursor: wait !important;
 }
+
+/* ── 診断結果 PDF キャプチャ用 ── */
+.diagnosis-pdf-export-capture .diagnosis-result-summary {
+  background: none !important;
+  -webkit-background-clip: unset !important;
+  background-clip: unset !important;
+  -webkit-text-fill-color: #ffffff !important;
+  color: #ffffff !important;
+}
+
+.diagnosis-pdf-export-capture .premium-locked-charts,
+.diagnosis-pdf-export-capture .premium-sandstorm-layer,
+.diagnosis-pdf-export-capture .premium-mosaic-layer,
+.diagnosis-pdf-export-capture .premium-upgrade-card {
+  animation: none !important;
+}

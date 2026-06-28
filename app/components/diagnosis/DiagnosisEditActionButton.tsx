@@ -118,6 +118,8 @@ export default function DiagnosisEditActionButton({
             閉じる
           </Button>
           <Button
+            component={Link}
+            href="/#pricing"
             variant="contained"
             fullWidth
             className="premium-upgrade-btn"

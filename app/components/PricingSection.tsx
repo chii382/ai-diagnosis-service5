@@ -12,6 +12,7 @@ import WorkspacePremiumIcon from "@mui/icons-material/WorkspacePremium";
 import PanelBackground from "@/app/components/common/PanelBackground";
 import LoggedOutCTA from "@/app/components/common/LoggedOutCTA";
 import PricingPlanFeatures from "@/app/components/PricingPlanFeatures";
+import CheckoutButton from "@/app/components/CheckoutButton";
 
 type PlanTier = {
   id: "free" | "standard" | "premium";
@@ -59,8 +60,8 @@ const plans: PlanTier[] = [
   {
     id: "standard",
     name: "有料（スタンダード）",
-    priceLabel: "準備中",
-    priceNote: "順次公開予定",
+    priceLabel: "¥980/月",
+    priceNote: "",
     description: "分析を深め、次の一手まで具体化したい方向け。",
     accent: "#818cf8",
     glow: "rgba(129,140,248,0.28)",
@@ -223,9 +224,11 @@ export default function PricingSection() {
                           >
                             {plan.name}
                           </Typography>
-                          <Typography sx={{ color: "rgba(255,255,255,0.55)", fontSize: "0.78rem" }}>
-                            {plan.priceNote}
-                          </Typography>
+                          {plan.priceNote ? (
+                            <Typography sx={{ color: "rgba(255,255,255,0.55)", fontSize: "0.78rem" }}>
+                              {plan.priceNote}
+                            </Typography>
+                          ) : null}
                         </Box>
                       </Stack>
 
@@ -253,6 +256,14 @@ export default function PricingSection() {
                         features={plan.features}
                         footnote={plan.footnote}
                       />
+
+                      {plan.id === "standard" && (
+                        <CheckoutButton
+                          label="スタンダードプランを購入する（¥980）"
+                          variant="contained"
+                          fullWidth
+                        />
+                      )}
                     </Stack>
                   </Box>
                 </Grid>

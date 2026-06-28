@@ -12,10 +12,14 @@ import Typography from "@mui/material/Typography";
 import HistoryIcon from "@mui/icons-material/History";
 import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
 import DashboardOutlinedIcon from "@mui/icons-material/DashboardOutlined";
+import DiagnosisPdfExportButton, {
+  DIAGNOSIS_RESULT_EXPORT_ROOT_ID,
+} from "@/app/components/diagnosis/DiagnosisPdfExportButton";
 import DiagnosisEditActionButton from "@/app/components/diagnosis/DiagnosisEditActionButton";
 import DiagnosisAnswersRecap from "@/app/components/diagnosis/DiagnosisAnswersRecap";
 import DiagnosisPremiumChartsSection from "@/app/components/diagnosis/DiagnosisPremiumChartsSection";
 import FreePlanBadge from "@/app/components/diagnosis/FreePlanBadge";
+import PlanStatusBadge from "@/app/components/member/PlanStatusBadge";
 import PlanUpgradeNotice from "@/app/components/diagnosis/PlanUpgradeNotice";
 import RoadmapBriefBody from "@/app/components/diagnosis/RoadmapBriefBody";
 import RoadmapPhaseBody from "@/app/components/diagnosis/RoadmapPhaseBody";
@@ -34,7 +38,7 @@ import type {
   DiagnosisDocument,
 } from "@/lib/diagnosis/types";
 import { glassCardSx, eyebrowSx } from "@/app/components/member/memberStyles";
-import { canEditDiagnosisResult, canViewPremiumContent, getDefaultUserPlan } from "@/lib/plan";
+import { canEditDiagnosisResult, canViewPremiumContent, type UserPlan } from "@/lib/plan";
 import { jpBodyTextSx } from "@/lib/typography";
 
 const outlinedActionButtonSx = {
@@ -45,6 +49,7 @@ const outlinedActionButtonSx = {
 
 interface DiagnosisResultViewProps {
   diagnosis: DiagnosisDocument;
+  plan: UserPlan;
   showActions?: boolean;
   returnTo?: string;
 }
@@ -86,12 +91,12 @@ function RoadmapCard({
 
 export default function DiagnosisResultView({
   diagnosis,
+  plan,
   showActions = true,
   returnTo,
 }: DiagnosisResultViewProps) {
   const resultReturnTo = resolveDiagnosisReturnTo(diagnosis._id, returnTo);
   const created = new Date(diagnosis.createdAt).toLocaleString("ja-JP");
-  const plan = getDefaultUserPlan();
   const isPremium = canViewPremiumContent(plan);
   const canEdit = canEditDiagnosisResult(plan);
   const result = getResultForPlan(diagnosis, plan);
@@ -110,6 +115,7 @@ export default function DiagnosisResultView({
 
   return (
     <Stack spacing={3}>
+      <Box id={DIAGNOSIS_RESULT_EXPORT_ROOT_ID}>
       <DiagnosisAnswersRecap answers={diagnosis.answers} createdAt={created} />
 
       <Stack spacing={1.5} alignItems="center" sx={{ py: 0.5, position: "relative", zIndex: 1 }}>
@@ -168,6 +174,7 @@ export default function DiagnosisResultView({
             </Stack>
             <Typography
               variant="h5"
+              className="diagnosis-result-summary"
               sx={{
                 fontWeight: 700,
                 lineHeight: 1.55,
@@ -236,9 +243,9 @@ export default function DiagnosisResultView({
       <Stack spacing={1.5}>
         <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
           <Typography variant="h6" sx={{ fontWeight: 700 }}>
-            キャリアロードマップ
+            {isPremium ? "詳細キャリアロードマップ" : "キャリアロードマップ"}
           </Typography>
-          {!isPremium && <FreePlanBadge />}
+          <PlanStatusBadge plan={plan} />
         </Stack>
         {!isPremium && (
           <PlanUpgradeNotice
@@ -272,6 +279,7 @@ export default function DiagnosisResultView({
       </Stack>
 
       <DiagnosisPremiumChartsSection diagnosis={diagnosis} plan={plan} />
+      </Box>
 
       {showActions && (
         <Stack
@@ -283,6 +291,11 @@ export default function DiagnosisResultView({
           useFlexGap
         >
           <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5} useFlexGap flexWrap="wrap">
+            <DiagnosisPdfExportButton
+              plan={plan}
+              diagnosisId={diagnosis._id}
+              createdAt={diagnosis.createdAt}
+            />
             <DiagnosisEditActionButton
               editHref={buildDiagnosisEditHref(diagnosis._id, resultReturnTo)}
               unlocked={canEdit}

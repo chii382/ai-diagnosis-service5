@@ -1,5 +1,6 @@
 import type { NextAuthConfig } from "next-auth";
 import Google from "next-auth/providers/google";
+import { DEFAULT_USER_PLAN, normalizeUserPlan } from "@/lib/plan";
 import { normalizeUserRole, type UserRole } from "@/lib/user/types";
 
 function buildProviders() {
@@ -64,8 +65,14 @@ export const authConfig = {
       if (trigger === "update" && session?.role) {
         token.role = session.role as UserRole;
       }
+      if (trigger === "update" && session?.plan) {
+        token.plan = normalizeUserPlan(session.plan);
+      }
       if (!token.role) {
         token.role = "user";
+      }
+      if (!token.plan) {
+        token.plan = DEFAULT_USER_PLAN;
       }
       return token;
     },
@@ -77,6 +84,7 @@ export const authConfig = {
         session.user.image = token.picture;
       }
       session.user.role = normalizeUserRole(token.role);
+      session.user.plan = normalizeUserPlan(token.plan);
       return session;
     },
   },

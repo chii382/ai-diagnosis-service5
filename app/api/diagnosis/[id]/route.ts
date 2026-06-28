@@ -7,7 +7,8 @@ import {
 import { getDiagnosesCollection } from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
 import { NextResponse } from "next/server";
-import { canEditDiagnosisResult, getDefaultUserPlan } from "@/lib/plan";
+import { canEditDiagnosisResult } from "@/lib/plan";
+import { fetchUserPlanForUser } from "@/lib/user/server";
 
 export const runtime = "nodejs";
 
@@ -70,7 +71,7 @@ export async function PUT(request: Request, context: RouteContext) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  const plan = getDefaultUserPlan();
+  const plan = await fetchUserPlanForUser(session.user.id);
   if (!canEditDiagnosisResult(plan)) {
     return NextResponse.json(
       { error: "診断結果の編集は有料プラン限定です" },

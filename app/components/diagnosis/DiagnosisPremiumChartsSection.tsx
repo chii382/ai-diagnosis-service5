@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
@@ -162,6 +163,8 @@ export default function DiagnosisPremiumChartsSection({
                   </Stack>
 
                   <Button
+                    component={Link}
+                    href="/#pricing"
                     variant="contained"
                     size="large"
                     fullWidth

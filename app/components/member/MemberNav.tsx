@@ -13,6 +13,7 @@ import Stack from "@mui/material/Stack";
 import Avatar from "@mui/material/Avatar";
 import Box from "@mui/material/Box";
 import ExploreIcon from "@mui/icons-material/Explore";
+import AdminPanelSettingsOutlinedIcon from "@mui/icons-material/AdminPanelSettingsOutlined";
 
 interface MemberNavProps {
   userName?: string | null;
@@ -33,6 +34,20 @@ const navButtonSx = (active: boolean) =>
     backgroundColor: active ? "rgba(56,123,255,0.18)" : "transparent",
     "&:hover": {
       backgroundColor: active ? "rgba(56,123,255,0.24)" : "rgba(255,255,255,0.06)",
+    },
+  }) as const;
+
+const adminNavButtonSx = (active: boolean) =>
+  ({
+    color: "#fff",
+    fontWeight: 700,
+    border: "1px solid rgba(251,146,60,0.55)",
+    backgroundColor: active ? "rgba(251,146,60,0.32)" : "rgba(251,146,60,0.2)",
+    boxShadow: "0 0 18px rgba(251,146,60,0.28)",
+    "&:hover": {
+      backgroundColor: "rgba(251,146,60,0.36)",
+      borderColor: "rgba(251,191,36,0.85)",
+      boxShadow: "0 0 24px rgba(251,146,60,0.4)",
     },
   }) as const;
 
@@ -87,13 +102,15 @@ export default function MemberNav({
         <Stack direction="row" spacing={0.5} sx={{ flex: 1 }}>
           {links.map((link) => {
             const active = link.match(pathname);
+            const isAdminLink = link.href === "/admin";
             return (
               <Button
                 key={link.href}
                 component={Link}
                 href={link.href}
                 size="small"
-                sx={navButtonSx(active)}
+                startIcon={isAdminLink ? <AdminPanelSettingsOutlinedIcon sx={{ fontSize: 16 }} /> : undefined}
+                sx={isAdminLink ? adminNavButtonSx(active) : navButtonSx(active)}
               >
                 {link.label}
               </Button>

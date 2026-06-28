@@ -8,8 +8,9 @@ import DiagnosisEditForm from "@/app/components/diagnosis/DiagnosisEditForm";
 import MemberNav from "@/app/components/member/MemberNav";
 import MemberCinematicBackground from "@/app/components/member/MemberCinematicBackground";
 import { eyebrowSx } from "@/app/components/member/memberStyles";
-import { canEditDiagnosisResult, getDefaultUserPlan } from "@/lib/plan";
+import { canEditDiagnosisResult } from "@/lib/plan";
 import { fetchDiagnosisForUser } from "@/lib/diagnosis/server";
+import { fetchUserPlanForUser } from "@/lib/user/server";
 import { resolveDiagnosisReturnTo } from "@/lib/diagnosis/navigation";
 
 export const metadata = {
@@ -36,7 +37,7 @@ export default async function DiagnosisEditPage({ params, searchParams }: PagePr
     redirect("/diagnosis/history");
   }
 
-  const plan = getDefaultUserPlan();
+  const plan = await fetchUserPlanForUser(session.user.id);
   if (!canEditDiagnosisResult(plan)) {
     redirect(`/diagnosis/result?id=${id}`);
   }
@@ -60,7 +61,7 @@ export default async function DiagnosisEditPage({ params, searchParams }: PagePr
                 診断結果の編集
               </Typography>
             </Stack>
-            <DiagnosisEditForm diagnosis={diagnosis} returnTo={returnTo} />
+            <DiagnosisEditForm diagnosis={diagnosis} plan={plan} returnTo={returnTo} />
           </Stack>
         </Container>
       </Box>

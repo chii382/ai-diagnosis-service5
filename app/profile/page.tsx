@@ -9,6 +9,8 @@ import Typography from "@mui/material/Typography";
 import MemberNav from "@/app/components/member/MemberNav";
 import MemberVideoBackground from "@/app/components/member/MemberVideoBackground";
 import ProfileForm, { ProfileData } from "@/app/profile/ProfileForm";
+import PlanStatusBadge from "@/app/components/member/PlanStatusBadge";
+import { normalizeUserPlan } from "@/lib/plan";
 import { resolveInternalReturnTo } from "@/lib/navigation";
 
 export const metadata = {
@@ -36,6 +38,8 @@ export default async function ProfilePage({ searchParams }: PageProps) {
   if (!user) {
     redirect("/auth/signin");
   }
+
+  const plan = normalizeUserPlan(user.plan);
 
   const initialProfile: ProfileData = {
     id: user._id.toString(),
@@ -78,6 +82,7 @@ export default async function ProfilePage({ searchParams }: PageProps) {
             <Typography variant="h3" component="h1" sx={{ fontWeight: 700, color: "#fff", textShadow: "0 0 32px rgba(56,123,255,0.2)" }}>
               プロフィール
             </Typography>
+            <PlanStatusBadge plan={plan} />
             <Typography sx={{ color: "rgba(255,255,255,0.82)", lineHeight: 1.85 }}>
               <Box component="span" sx={{ display: "block" }}>
                 表示名の変更やアカウント情報の確認ができます。

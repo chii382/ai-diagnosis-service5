@@ -45,13 +45,26 @@ export function getPlanAdminLabel(plan: UserPlan): string {
   }
 }
 
+/** 会員画面向けのプラン表示（ダッシュボード等） */
 export function getPlanLabel(plan: UserPlan): string {
   switch (plan) {
     case "standard":
-      return "スタンダードプラン";
+      return "有料スタンダードプラン";
     case "premium":
-      return "宇宙級プラン";
+      return "有料宇宙級プラン";
     default:
       return "無料プラン";
+  }
+}
+
+/** プランバッジのステータスドット色 */
+export function getPlanIndicatorStyle(plan: UserPlan): { color: string; glow: string } {
+  switch (plan) {
+    case "standard":
+      return { color: "#fb923c", glow: "rgba(251,146,60,0.85)" };
+    case "premium":
+      return { color: "#c084fc", glow: "rgba(192,132,252,0.85)" };
+    default:
+      return { color: "#4ade80", glow: "rgba(74,222,128,0.85)" };
   }
 }

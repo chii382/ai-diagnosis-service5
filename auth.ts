@@ -3,9 +3,9 @@ import { MongoDBAdapter } from "@auth/mongodb-adapter";
 import { ObjectId } from "mongodb";
 import { authConfig } from "@/auth.config";
 import { bootstrapAdminByEmail, getAdminBootstrapEmails } from "@/lib/admin/server";
-import { DEFAULT_USER_ROLE, normalizeUserRole, type UserRole } from "@/lib/user/types";
-import { DEFAULT_USER_PLAN } from "@/lib/plan";
+import { DEFAULT_USER_PLAN, normalizeUserPlan } from "@/lib/plan";
 import { getMongoClientPromise, getUsersCollection, isMongoConfigured } from "@/lib/mongodb";
+import { DEFAULT_USER_ROLE, normalizeUserRole, type UserRole } from "@/lib/user/types";
 
 const adapter = isMongoConfigured()
   ? MongoDBAdapter(getMongoClientPromise())
@@ -29,10 +29,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           const users = await getUsersCollection();
           const doc = await users.findOne(
             { _id: new ObjectId(nextToken.id) },
-            { projection: { role: 1, email: 1 } },
+            { projection: { role: 1, email: 1, plan: 1 } },
           );
           if (doc) {
             nextToken.role = normalizeUserRole(doc.role);
+            nextToken.plan = normalizeUserPlan(doc.plan);
             const adminEmails = getAdminBootstrapEmails();
             const userEmail = typeof doc.email === "string" ? doc.email : "";
             if (adminEmails.includes(userEmail) && nextToken.role !== "admin") {
@@ -42,6 +43,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           }
         } catch {
           nextToken.role = (nextToken.role as UserRole | undefined) ?? "user";
+          nextToken.plan = normalizeUserPlan(nextToken.plan);
         }
       }
 
@@ -50,6 +52,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async session(params) {
       const nextSession = await authConfig.callbacks.session!(params);
       nextSession.user.role = normalizeUserRole(params.token.role);
+      nextSession.user.plan = normalizeUserPlan(params.token.plan);
       return nextSession;
     },
   },

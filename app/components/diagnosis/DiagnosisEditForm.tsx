@@ -30,10 +30,11 @@ import {
 import { resolveRoadmapBrief } from "@/lib/diagnosis/plan-content";
 import type { DiagnosisDocument } from "@/lib/diagnosis/types";
 import { glassCardSx } from "@/app/components/member/memberStyles";
-import { canViewPremiumContent, getDefaultUserPlan } from "@/lib/plan";
+import { canViewPremiumContent, type UserPlan } from "@/lib/plan";
 
 interface DiagnosisEditFormProps {
   diagnosis: DiagnosisDocument;
+  plan: UserPlan;
   returnTo: string;
 }
 
@@ -48,9 +49,8 @@ function arrayToLines(items: string[]): string {
   return items.join("\n");
 }
 
-export default function DiagnosisEditForm({ diagnosis, returnTo }: DiagnosisEditFormProps) {
+export default function DiagnosisEditForm({ diagnosis, plan, returnTo }: DiagnosisEditFormProps) {
   const router = usePendingRouter();
-  const plan = getDefaultUserPlan();
   const isPremium = canViewPremiumContent(plan);
   const initialRoadmapBrief = resolveRoadmapBrief(diagnosis);
 

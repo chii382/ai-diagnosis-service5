@@ -17,15 +17,16 @@ import PsychologyOutlinedIcon from "@mui/icons-material/PsychologyOutlined";
 import HistoryOutlinedIcon from "@mui/icons-material/HistoryOutlined";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import WorkspacePremiumOutlinedIcon from "@mui/icons-material/WorkspacePremiumOutlined";
 import MemberNav from "@/app/components/member/MemberNav";
 import MemberCinematicBackground from "@/app/components/member/MemberCinematicBackground";
 import {
   ADMIN_ACCESS_DENIED_MESSAGE,
   ADMIN_ACCESS_DENIED_QUERY,
 } from "@/lib/admin/require-admin";
-import { getDefaultUserPlan, getPlanLabel } from "@/lib/plan";
 import { jpTextSx } from "@/lib/typography";
 import { fetchUserProfileForUser } from "@/lib/user/server";
+import PlanStatusBadge from "@/app/components/member/PlanStatusBadge";
 
 export const metadata = {
   title: "ダッシュボード | AIキャリア診断",
@@ -87,8 +88,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
   const displayName = dbUser.name || session.user.name || "会員";
   const displayImage = dbUser.image || session.user.image || null;
   const displayEmail = dbUser.email || session.user.email || "";
-  const plan = getDefaultUserPlan();
-  const planLabel = getPlanLabel(plan);
+  const plan = dbUser.plan;
 
   return (
     <Box sx={{ position: "relative", minHeight: "100svh", overflowX: "hidden" }}>
@@ -210,44 +210,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                         <Typography variant="h6" sx={{ fontWeight: 700, lineHeight: 1.3 }}>
                           {displayName || "未設定"}
                         </Typography>
-                        <Box
-                          sx={{
-                            display: "inline-flex",
-                            alignItems: "center",
-                            gap: 0.75,
-                            px: 1.1,
-                            py: 0.45,
-                            borderRadius: 999,
-                            border: "1px solid rgba(147,197,253,0.42)",
-                            background:
-                              "linear-gradient(135deg, rgba(56,123,255,0.22) 0%, rgba(34,211,238,0.1) 100%)",
-                            boxShadow: "0 0 14px rgba(56,123,255,0.12)",
-                          }}
-                        >
-                          <Box
-                            aria-hidden
-                            sx={{
-                              width: 7,
-                              height: 7,
-                              borderRadius: "50%",
-                              flexShrink: 0,
-                              backgroundColor: "#4ade80",
-                              boxShadow: "0 0 8px rgba(74,222,128,0.85)",
-                            }}
-                          />
-                          <Typography
-                            sx={{
-                              ...jpTextSx,
-                              fontSize: "0.78rem",
-                              fontWeight: 600,
-                              color: "rgba(255,255,255,0.92)",
-                              lineHeight: 1.2,
-                              whiteSpace: "nowrap",
-                            }}
-                          >
-                            {`ご利用中 ${planLabel}`}
-                          </Typography>
-                        </Box>
+                        <PlanStatusBadge plan={plan} />
                       </Stack>
                       <Typography variant="body2" sx={{ color: "rgba(255,255,255,0.65)" }}>
                         {displayEmail}
@@ -278,6 +241,29 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                     }}
                   >
                     プロフィール設定
+                  </Button>
+                  <Button
+                    component={Link}
+                    href="/#pricing"
+                    variant="contained"
+                    fullWidth
+                    startIcon={<WorkspacePremiumOutlinedIcon />}
+                    sx={{
+                      justifyContent: "flex-start",
+                      py: 1.35,
+                      px: 2,
+                      borderRadius: 2,
+                      fontWeight: 700,
+                      color: "#fff",
+                      background: "linear-gradient(90deg, #f97316 0%, #fb923c 55%, #fbbf24 100%)",
+                      boxShadow: "0 8px 28px rgba(249,115,22,0.35)",
+                      "&:hover": {
+                        background: "linear-gradient(90deg, #fb923c 0%, #fdba74 55%, #fcd34d 100%)",
+                        boxShadow: "0 12px 36px rgba(249,115,22,0.45)",
+                      },
+                    }}
+                  >
+                    料金プランを変更する
                   </Button>
                 </Stack>
               </CardContent>
